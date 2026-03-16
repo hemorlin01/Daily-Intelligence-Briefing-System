@@ -1,0 +1,62 @@
+{
+  "event_types": [
+    "policy_move",
+    "earnings_result",
+    "regulatory_shift",
+    "product_launch",
+    "infrastructure_project",
+    "conflict_escalation",
+    "market_signal",
+    "long_form_analysis",
+    "executive_change",
+    "scientific_finding",
+    "legal_action",
+    "funding_or_deal",
+    "opinion_or_argument"
+  ],
+  "strategic_dimensions": [
+    "supply_chain",
+    "industrial_policy",
+    "climate_risk",
+    "platform_power",
+    "capital_markets",
+    "consumer_shift",
+    "energy_transition",
+    "urban_governance",
+    "digital_infrastructure",
+    "regulation",
+    "labor",
+    "geopolitics",
+    "trade",
+    "public_health",
+    "AI_competition"
+  ],
+  "topic_labels": [
+    "global_macro",
+    "geopolitics",
+    "technology",
+    "china_economy",
+    "climate_transition",
+    "urban_systems",
+    "digital_economy",
+    "policy_analysis",
+    "culture_design",
+    "lifestyle_signals"
+  ],
+  "novelty_signals": [
+    "new_event",
+    "new_angle",
+    "follow_on_update",
+    "repeated_coverage"
+  ],
+  "user_relevance_signals": [
+    "low",
+    "medium",
+    "high"
+  ],
+  "warning_severities": [
+    "info",
+    "warning",
+    "error"
+  ]
+}

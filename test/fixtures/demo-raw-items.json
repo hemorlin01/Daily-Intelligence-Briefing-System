@@ -1,0 +1,47 @@
+[
+  {
+    "source_id": "reuters",
+    "item": {
+      "title": "Central banks hold rates steady while markets wait",
+      "url": "https://www.reuters.com/world/central-banks-hold-rates-steady?utm_source=newsletter",
+      "canonical_text": "Central banks held rates steady while investors waited for more inflation data. Central banks held rates steady while investors waited for more inflation data. Central banks held rates steady while investors waited for more inflation data. Central banks held rates steady while investors waited for more inflation data. Central banks held rates steady while investors waited for more inflation data. Central banks held rates steady while investors waited for more inflation data.",
+      "snippet": "Investors are watching inflation and policy guidance after the latest central bank decisions across major markets.",
+      "published_at": "2026-03-16T08:00:00.000Z",
+      "author": "Reuters Staff",
+      "article_type": "news"
+    }
+  },
+  {
+    "source_id": "carbon-brief",
+    "item": {
+      "title": "Why the latest methane rules matter for energy markets",
+      "url": "https://www.carbonbrief.org/latest-methane-rules-matter-energy-markets/",
+      "canonical_text": "Methane rules are tightening and that matters for energy markets, power investment, and industrial policy. Methane rules are tightening and that matters for energy markets, power investment, and industrial policy. Methane rules are tightening and that matters for energy markets, power investment, and industrial policy. Methane rules are tightening and that matters for energy markets, power investment, and industrial policy. Methane rules are tightening and that matters for energy markets, power investment, and industrial policy. Methane rules are tightening and that matters for energy markets, power investment, and industrial policy.",
+      "snippet": "The regulatory shift is likely to affect infrastructure planning and investment decisions well beyond the energy sector.",
+      "published_at": "2026-03-15T18:00:00.000Z",
+      "author": "Carbon Brief Staff",
+      "article_type": "analysis"
+    }
+  },
+  {
+    "source_id": "techcrunch",
+    "item": {
+      "title": "Startups are rushing to build AI procurement tools",
+      "url": "https://techcrunch.com/2026/03/16/ai-procurement-tools/",
+      "snippet": "Enterprise buyers are looking for ways to compare AI vendors, contracts, procurement obligations, and model risks as spending rises through 2026.",
+      "published_at": "2026-03-16T05:00:00.000Z",
+      "author": "Reporter",
+      "article_type": "news"
+    }
+  },
+  {
+    "source_id": "unknown-source",
+    "item": {
+      "title": "Unsupported source should be rejected",
+      "url": "https://unsupported.example.com/story",
+      "snippet": "This item should not make it into the candidate pool because the source is not approved.",
+      "published_at": "2026-03-16T07:00:00.000Z",
+      "article_type": "news"
+    }
+  }
+]

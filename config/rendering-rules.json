@@ -1,0 +1,76 @@
+{
+  "briefing": {
+    "title": "Daily Intelligence Briefing",
+    "timezone": "UTC",
+    "date_format": "en-US"
+  },
+  "status_display": {
+    "show_run_status": true,
+    "labels": {
+      "on_target": "On target",
+      "under_default_target": "Under default target",
+      "degraded": "Degraded run"
+    }
+  },
+  "blocks": {
+    "order": [
+      "global_economy_markets",
+      "technology_industry",
+      "china_developments",
+      "climate_energy",
+      "urban_systems",
+      "policy_strategy",
+      "culture_design"
+    ],
+    "definitions": {
+      "global_economy_markets": {
+        "label": "Global Economy & Markets",
+        "domains": ["global_macro"]
+      },
+      "technology_industry": {
+        "label": "Technology & Industry",
+        "domains": ["technology", "digital_economy"]
+      },
+      "china_developments": {
+        "label": "China Developments",
+        "domains": ["china_economy"]
+      },
+      "climate_energy": {
+        "label": "Climate & Energy",
+        "domains": ["climate_transition"]
+      },
+      "urban_systems": {
+        "label": "Urban Systems",
+        "domains": ["urban_systems"]
+      },
+      "policy_strategy": {
+        "label": "Policy & Strategy",
+        "domains": ["policy_analysis", "geopolitics"]
+      },
+      "culture_design": {
+        "label": "Culture & Design",
+        "domains": ["culture_design", "lifestyle_signals"]
+      }
+    }
+  },
+  "email": {
+    "format": "text",
+    "include_footer": true,
+    "show_keywords": true,
+    "entry_separator": "\n"
+  },
+  "telegram": {
+    "format": "text",
+    "length_budget_chars": 3600,
+    "summary_max_chars": 120,
+    "why_max_chars": 110,
+    "compact_summary_max_chars": 84,
+    "compact_why_max_chars": 78,
+    "minimal_summary_max_chars": 60,
+    "minimal_why_max_chars": 56,
+    "block_heading_prefix": "#"
+  },
+  "markdown": {
+    "include_footer": true
+  }
+}

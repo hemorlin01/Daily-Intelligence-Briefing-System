@@ -1,0 +1,42 @@
+{
+  "artifacts": {
+    "output_root": "artifacts/runs",
+    "ledger_path": "artifacts/state/delivery-ledger.json"
+  },
+  "delivery": {
+    "email": {
+      "enabled": true,
+      "mode": "gmail-smtp",
+      "destination_env": "DIBS_EMAIL_TO",
+      "destination_fallback": "local-email-outbox"
+    },
+    "telegram": {
+      "enabled": true,
+      "mode": "telegram-bot-api",
+      "destination_env": "DIBS_TELEGRAM_CHAT_ID",
+      "destination_fallback": "local-telegram-outbox"
+    }
+  },
+  "retry": {
+    "max_attempts": 2,
+    "retryable_error_codes": [
+      "TRANSIENT_ERROR",
+      "TIMEOUT"
+    ]
+  },
+  "schedule": {
+    "enabled": false,
+    "timezone": "UTC",
+    "days": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
+    "hour": 7,
+    "minute": 0
+  }
+}

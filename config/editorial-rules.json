@@ -1,0 +1,184 @@
+{
+  "selection": {
+    "default_target_count": 10,
+    "minimum_target_count": 8,
+    "maximum_target_count": 12,
+    "minimum_candidate_score": 0.46,
+    "backfill_minimum_candidate_score": 0.5,
+    "healthy_pool_size": 12
+  },
+  "caps": {
+    "source_max_count": 2,
+    "cluster_max_count": 2,
+    "preferred_cluster_count": 1,
+    "source_class_dominance_warning_ratio": 0.5
+  },
+  "clustering": {
+    "similarity_threshold": 0.45,
+    "min_signal_matches": 2,
+    "time_decay_hours": 72,
+    "weights": {
+      "entity_overlap": 0.24,
+      "geography_overlap": 0.1,
+      "event_type_match": 0.13,
+      "topic_overlap": 0.16,
+      "strategic_overlap": 0.08,
+      "keyword_title_similarity": 0.19,
+      "time_proximity": 0.1
+    },
+    "angle_diversity": {
+      "title_similarity_max": 0.74,
+      "keyword_overlap_max": 0.7,
+      "summary_overlap_max": 0.72
+    }
+  },
+  "scoring": {
+    "weights": {
+      "source_priority_score": 0.12,
+      "freshness_score": 0.12,
+      "extraction_quality_score": 0.11,
+      "semantic_confidence_score": 0.14,
+      "user_relevance_score": 0.1,
+      "novelty_score": 0.09,
+      "domain_need_score": 0.09,
+      "cluster_uniqueness_score": 0.1,
+      "long_form_bonus": 0.05,
+      "redundancy_penalty": 0.08
+    },
+    "source_priority_by_tier": {
+      "1": 1,
+      "2": 0.72,
+      "3": 0.48
+    },
+    "user_relevance_scores": {
+      "high": 1,
+      "medium": 0.68,
+      "low": 0.38
+    },
+    "novelty_scores": {
+      "new_event": 1,
+      "new_angle": 0.84,
+      "follow_on_update": 0.62,
+      "repeated_coverage": 0.28
+    },
+    "freshness_windows_hours": {
+      "0": 1,
+      "12": 0.96,
+      "24": 0.82,
+      "36": 0.7,
+      "72": 0.46,
+      "168": 0.24
+    },
+    "long_form_bonus_event_types": [
+      "long_form_analysis",
+      "opinion_or_argument"
+    ],
+    "long_form_bonus_article_types": [
+      "analysis",
+      "essay",
+      "feature",
+      "research"
+    ]
+  },
+  "domain_priority_order": [
+    "global_macro",
+    "technology",
+    "china_economy",
+    "climate_transition",
+    "policy_analysis",
+    "digital_economy",
+    "urban_systems",
+    "geopolitics",
+    "culture_design",
+    "lifestyle_signals"
+  ],
+  "domain_quotas": {
+    "global_macro": {
+      "target_count": 1,
+      "hard_max_count": 2,
+      "soft_min_count": 1,
+      "priority": 10,
+      "adjacent_domains": ["policy_analysis", "china_economy", "digital_economy"]
+    },
+    "geopolitics": {
+      "target_count": 1,
+      "hard_max_count": 2,
+      "soft_min_count": 1,
+      "priority": 6,
+      "adjacent_domains": ["policy_analysis", "global_macro", "china_economy"]
+    },
+    "technology": {
+      "target_count": 1,
+      "hard_max_count": 2,
+      "soft_min_count": 1,
+      "priority": 9,
+      "adjacent_domains": ["digital_economy", "china_economy", "policy_analysis"]
+    },
+    "china_economy": {
+      "target_count": 1,
+      "hard_max_count": 2,
+      "soft_min_count": 1,
+      "priority": 8,
+      "adjacent_domains": ["global_macro", "technology", "policy_analysis"]
+    },
+    "climate_transition": {
+      "target_count": 1,
+      "hard_max_count": 2,
+      "soft_min_count": 1,
+      "priority": 8,
+      "adjacent_domains": ["urban_systems", "policy_analysis", "global_macro"]
+    },
+    "urban_systems": {
+      "target_count": 1,
+      "hard_max_count": 2,
+      "soft_min_count": 0,
+      "priority": 5,
+      "adjacent_domains": ["climate_transition", "policy_analysis", "lifestyle_signals"]
+    },
+    "digital_economy": {
+      "target_count": 1,
+      "hard_max_count": 2,
+      "soft_min_count": 0,
+      "priority": 7,
+      "adjacent_domains": ["technology", "global_macro", "culture_design"]
+    },
+    "policy_analysis": {
+      "target_count": 1,
+      "hard_max_count": 2,
+      "soft_min_count": 1,
+      "priority": 7,
+      "adjacent_domains": ["global_macro", "geopolitics", "climate_transition"]
+    },
+    "culture_design": {
+      "target_count": 1,
+      "hard_max_count": 1,
+      "soft_min_count": 0,
+      "priority": 4,
+      "adjacent_domains": ["lifestyle_signals", "digital_economy", "urban_systems"]
+    },
+    "lifestyle_signals": {
+      "target_count": 1,
+      "hard_max_count": 1,
+      "soft_min_count": 0,
+      "priority": 3,
+      "adjacent_domains": ["culture_design", "urban_systems", "digital_economy"]
+    }
+  },
+  "strategic_backfill_priority": [
+    "AI_competition",
+    "industrial_policy",
+    "energy_transition",
+    "capital_markets",
+    "trade",
+    "regulation",
+    "digital_infrastructure",
+    "urban_governance",
+    "platform_power",
+    "consumer_shift",
+    "climate_risk",
+    "geopolitics",
+    "public_health",
+    "labor",
+    "supply_chain"
+  ]
+}

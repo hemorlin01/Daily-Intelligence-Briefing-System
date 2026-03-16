@@ -1,0 +1,49 @@
+{
+  "candidate_windows": {
+    "default_fetch_hours": 36,
+    "preferred_freshness_hours": 24,
+    "long_form_max_hours": 120
+  },
+  "content_thresholds": {
+    "substantial_snippet_chars": 140,
+    "minimum_content_signal_chars": 60,
+    "backup_pool_min_quality": 0.35,
+    "main_pool_min_quality": 0.6
+  },
+  "quality_scoring": {
+    "canonical_text_good_chars": 1200,
+    "canonical_text_partial_chars": 400,
+    "snippet_good_chars": 220,
+    "snippet_partial_chars": 120
+  },
+  "deduplication": {
+    "near_duplicate_title_threshold": 0.86,
+    "syndicated_title_threshold": 0.78,
+    "syndicated_content_threshold": 0.72,
+    "max_content_fingerprint_chars": 600
+  },
+  "article_like_rules": {
+    "blocked_article_types": [
+      "audio",
+      "gallery",
+      "live-video",
+      "media-only",
+      "navigation",
+      "podcast",
+      "video",
+      "video-only"
+    ],
+    "blocked_url_substrings": [
+      "/gallery/",
+      "/photos/",
+      "/podcast/",
+      "/video/",
+      "/videos/"
+    ],
+    "blocked_title_keywords": [
+      "photo gallery",
+      "podcast",
+      "watch live"
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "language_behavior": {
+    "factual_summary_same_as_source": true,
+    "why_it_matters_default_language": "en"
+  },
+  "summary_rules": {
+    "english_max_chars": 220,
+    "non_english_max_chars": 140,
+    "why_it_matters_max_chars": 220,
+    "overlap_threshold": 0.72,
+    "token_overlap_threshold": 0.55
+  },
+  "confidence_rules": {
+    "low_confidence_threshold": 0.45,
+    "weak_input_threshold": 0.55
+  },
+  "keyword_rules": {
+    "max_keywords": 6,
+    "max_keyword_words": 4,
+    "max_keyword_chars": 32
+  },
+  "event_type_keywords": {
+    "policy_move": ["policy", "policies", "plan", "plans", "pledge", "pledges", "announced", "initiative", "ministry", "国务院", "政策", "计划"],
+    "earnings_result": ["earnings", "revenue", "profit", "quarter", "guidance", "results", "财报", "营收", "利润"],
+    "regulatory_shift": ["regulator", "regulatory", "antitrust", "approval", "rules", "rule", "law", "ban", "compliance", "监管", "规定", "条例"],
+    "product_launch": ["launch", "unveil", "release", "debut", "introduces", "推出", "发布"],
+    "infrastructure_project": ["infrastructure", "project", "rail", "metro", "plant", "grid", "factory", "port", "bridge", "data center", "基础设施", "项目"],
+    "conflict_escalation": ["conflict", "military", "strike", "attack", "missile", "troops", "ceasefire", "war", "sanctions", "冲突", "袭击", "停火"],
+    "market_signal": ["market", "stocks", "bond", "yields", "inflation", "rates", "demand", "investment", "exports", "imports", "市场", "利率", "通胀"],
+    "long_form_analysis": ["analysis", "explainer", "feature", "report", "research", "essay", "long read", "分析", "深度", "报告"],
+    "executive_change": ["ceo", "chair", "executive", "appoints", "resigns", "steps down", "leadership", "人事", "任命", "辞职"],
+    "scientific_finding": ["study", "researchers", "scientists", "finding", "paper", "trial", "研究", "发现", "论文"],
+    "legal_action": ["lawsuit", "court", "judge", "legal", "sues", "settlement", "诉讼", "法院", "判决"],
+    "funding_or_deal": ["acquire", "acquisition", "merger", "deal", "funding", "raises", "investment", "stake", "收购", "融资", "交易"],
+    "opinion_or_argument": ["opinion", "argument", "commentary", "column", "观点", "评论"]
+  },
+  "topic_keywords": {
+    "global_macro": ["economy", "markets", "inflation", "rates", "trade", "exports", "imports", "macro", "growth", "recession", "economy", "经济", "市场", "通胀"],
+    "geopolitics": ["diplomacy", "sanctions", "war", "military", "security", "alliance", "election", "conflict", "geopolitics", "外交", "制裁", "冲突"],
+    "technology": ["ai", "artificial intelligence", "chip", "chips", "semiconductor", "software", "cloud", "robot", "device", "tech", "科技", "芯片", "人工智能"],
+    "china_economy": ["china", "beijing", "shanghai", "renminbi", "yuan", "中国", "北京", "上海", "人民币"],
+    "climate_transition": ["climate", "emissions", "methane", "energy transition", "renewable", "solar", "wind", "battery", "carbon", "气候", "减排", "能源转型"],
+    "urban_systems": ["city", "urban", "transit", "transport", "housing", "infrastructure", "metro", "mobility", "城市", "交通", "住房"],
+    "digital_economy": ["platform", "ecommerce", "payments", "consumer app", "digital", "data center", "advertising", "creator", "电商", "平台", "数字经济"],
+    "policy_analysis": ["policy", "regulation", "analysis", "think tank", "institution", "governance", "policy", "政策", "治理", "研究"],
+    "culture_design": ["design", "architecture", "photography", "museum", "culture", "creative", "艺术", "设计", "文化"],
+    "lifestyle_signals": ["travel", "coffee", "fashion", "weekend", "lifestyle", "living", "旅行", "生活方式"]
+  },
+  "strategic_dimension_keywords": {
+    "supply_chain": ["supply chain", "supplier", "manufacturing", "logistics", "shipment", "供应链", "制造"],
+    "industrial_policy": ["industrial policy", "subsidy", "factory", "capacity", "制造业", "产业政策"],
+    "climate_risk": ["climate risk", "adaptation", "heat", "flood", "wildfire", "气候风险"],
+    "platform_power": ["platform", "marketplace", "app store", "ecosystem", "平台"],
+    "capital_markets": ["market", "stocks", "bonds", "equity", "investors", "capital", "市场", "资本"],
+    "consumer_shift": ["consumer", "retail", "shopping", "brand", "buyers", "消费"],
+    "energy_transition": ["renewable", "grid", "battery", "power", "methane", "能源转型", "电网"],
+    "urban_governance": ["city hall", "mayor", "housing", "zoning", "transit", "urban", "城市治理"],
+    "digital_infrastructure": ["cloud", "data center", "broadband", "chip", "semiconductor", "数字基础设施", "数据中心"],
+    "regulation": ["regulation", "rules", "law", "regulator", "compliance", "监管"],
+    "labor": ["labor", "worker", "union", "hiring", "jobs", "就业", "劳工"],
+    "geopolitics": ["security", "alliance", "sanctions", "military", "war", "地缘政治"],
+    "trade": ["trade", "tariff", "export", "import", "shipping", "贸易", "关税"],
+    "public_health": ["health", "hospital", "medical", "disease", "vaccine", "公共卫生"],
+    "AI_competition": ["ai", "artificial intelligence", "model", "chip", "compute", "人工智能", "模型"]
+  },
+  "geography_keywords": {
+    "global": ["global", "worldwide", "international"],
+    "United States": ["united states", "us ", "u.s.", "america", "washington", "new york", "california"],
+    "China": ["china", "beijing", "shanghai", "shenzhen", "hong kong", "中国", "北京", "上海", "深圳", "香港"],
+    "Europe": ["europe", "eu", "brussels", "berlin", "paris"],
+    "United Kingdom": ["uk", "britain", "london", "england"],
+    "Japan": ["japan", "tokyo", "osaka", "日本", "东京"],
+    "Singapore": ["singapore", "新加坡"],
+    "Middle East": ["middle east", "gaza", "israel", "iran", "saudi"],
+    "Asia": ["asia", "asian", "taiwan", "india", "korea", "asean", "亚洲", "台湾", "印度", "韩国"]
+  },
+  "english_stop_entities": [
+    "A",
+    "An",
+    "And",
+    "At",
+    "By",
+    "For",
+    "From",
+    "In",
+    "Into",
+    "Markets",
+    "On",
+    "The",
+    "This",
+    "That",
+    "These",
+    "Those",
+    "With"
+  ]
+}
