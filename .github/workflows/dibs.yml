@@ -46,7 +46,7 @@ jobs:
         run: npm test
 
       - name: Run DIBS
-        run: npm run dibs:run -- --input test/fixtures/demo-raw-items.json --channels email
+        run: npm run dibs:run -- --input test/fixtures/demo-raw-items.json --channels email,telegram
 
       - name: Upload run artifacts
         uses: actions/upload-artifact@v4
