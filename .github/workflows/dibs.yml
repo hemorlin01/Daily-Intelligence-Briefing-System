@@ -1,0 +1,56 @@
+name: DIBS Daily Run
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 23 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dibs-daily-run
+  cancel-in-progress: false
+
+jobs:
+  run-dibs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      GMAIL_SMTP_HOST: ${{ secrets.GMAIL_SMTP_HOST }}
+      GMAIL_SMTP_PORT: ${{ secrets.GMAIL_SMTP_PORT }}
+      GMAIL_SMTP_SECURE: ${{ secrets.GMAIL_SMTP_SECURE }}
+      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
+      GMAIL_SMTP_APP_PASSWORD: ${{ secrets.GMAIL_SMTP_APP_PASSWORD }}
+      GMAIL_FROM_ADDRESS: ${{ secrets.GMAIL_FROM_ADDRESS }}
+      DIBS_EMAIL_TO: ${{ secrets.DIBS_EMAIL_TO }}
+
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      DIBS_TELEGRAM_CHAT_ID: ${{ secrets.DIBS_TELEGRAM_CHAT_ID }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run DIBS
+        run: npm run dibs:run -- --input test/fixtures/demo-raw-items.json --channels email
+
+      - name: Upload run artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dibs-run-artifacts
+          path: artifacts/runs
+          if-no-files-found: warn
