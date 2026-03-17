@@ -9,6 +9,15 @@ import { buildTokenFingerprint, diceCoefficient, jaccardSimilarity } from '../ut
 const DEFAULT_EDITORIAL_RULES_PATH = resolve(process.cwd(), 'config', 'editorial-rules.json');
 const DEFAULT_SEMANTIC_TAXONOMY_PATH = resolve(process.cwd(), 'config', 'semantic-taxonomy.json');
 const DEFAULT_SOURCES_PATH = resolve(process.cwd(), 'config', 'sources.json');
+const SOFT_CONTENT_DOMAINS = new Set(['culture_design', 'lifestyle_signals']);
+const SOFT_CONTENT_TITLE_PATTERNS = [
+  /\breview\b/i,
+  /\bfirst look\b/i,
+  /\bimpressions\b/i,
+  /\bguide\b/i,
+  /\bbest\b/i,
+  /\btop\s+\d+\b/i
+];
 
 function clamp(value, minimum = 0, maximum = 1) {
   return Math.max(minimum, Math.min(maximum, value));
@@ -63,6 +72,16 @@ function getExtractionQuality(card) {
 
 function getArticleType(card) {
   return card.metadata?.article_type ?? null;
+}
+
+function isSoftContentCandidate(candidate) {
+  const articleType = getArticleType(candidate.semantic_card) ?? '';
+  if (['review', 'lifestyle', 'service'].includes(articleType)) {
+    return true;
+  }
+
+  const title = candidate.title ?? '';
+  return SOFT_CONTENT_TITLE_PATTERNS.some((pattern) => pattern.test(title));
 }
 
 function isLowConfidence(card, rules) {
@@ -407,6 +426,15 @@ function selectCandidate({
   if (candidate.final_composite_score < rules.selection.minimum_candidate_score) {
     exclusionReasons.get(candidate.article_id).add('low_score');
     return false;
+  }
+
+  if (SOFT_CONTENT_DOMAINS.has(assignedDomain) && isSoftContentCandidate(candidate)) {
+    const softMinScore = rules.selection.minimum_candidate_score + 0.06;
+    const relevance = candidate.semantic_card.user_relevance_signal ?? 'low';
+    if (candidate.final_composite_score < softMinScore || relevance === 'low') {
+      exclusionReasons.get(candidate.article_id).add('low_value_soft_content');
+      return false;
+    }
   }
 
   if (sourceCount >= rules.caps.source_max_count) {

@@ -438,6 +438,29 @@ test('backfill logic does not automatically overfill geopolitics', () => {
   assert.equal(geopoliticsCount <= 1, true);
 });
 
+test('soft-feature review with low relevance is excluded', () => {
+  const cards = buildBalancedCards().filter((card) => card.topic_labels[0] !== 'lifestyle_signals');
+  const reviewCard = makeDomainCard('lifestyle_signals', {
+    article_id: 'soft-review-1',
+    title: 'Gadget review: handheld device gets a minor refresh',
+    user_relevance_signal: 'low',
+    metadata: {
+      article_type: 'review',
+      extraction_quality_score: 0.72,
+      source_priority_tier: 2
+    }
+  });
+
+  const result = buildEditorialSelection({
+    semanticCards: [...cards, reviewCard],
+    runTimestamp: FIXED_NOW.toISOString()
+  });
+
+  const candidate = result.scoredCandidates.find((entry) => entry.article_id === 'soft-review-1');
+  assert.equal(candidate.selected, false);
+  assert.equal(candidate.exclusion_reason_codes.includes('low_value_soft_content'), true);
+});
+
 test('scored candidates include all score components', () => {
   const result = buildEditorialSelection({
     semanticCards: buildBalancedCards(),

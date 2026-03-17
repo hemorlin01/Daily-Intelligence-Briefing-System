@@ -6,6 +6,46 @@ import { buildTokenFingerprint, diceCoefficient, jaccardSimilarity, normalizeTit
 
 const DEFAULT_SEMANTIC_TAXONOMY_PATH = resolve(process.cwd(), 'config', 'semantic-taxonomy.json');
 const DEFAULT_SEMANTIC_RULES_PATH = resolve(process.cwd(), 'config', 'semantic-rules.json');
+const SUMMARY_RESIDUE_PATTERNS_EN = [
+  /the post\b.*\bappeared first on/i,
+  /\bappeared first on\b/i,
+  /\bwas originally published on\b/i,
+  /\boriginally appeared on\b/i,
+  /\boriginally published at\b/i,
+  /\bthis article was originally published\b/i,
+  /\bcontinue reading\b/i,
+  /\bread more\b/i,
+  /\bclick here\b/i,
+  /\bsubscribe\b/i,
+  /\bview the full post\b/i,
+  /\bshare this post\b/i,
+  /\bprimary image\b/i,
+  /\bfeatured image\b/i,
+  /\bimage credit\b/i,
+  /\bphoto credit\b/i,
+  /\bposted in\b/i,
+  /\bfiled under\b/i,
+  /\bcategory:\b/i,
+  /\btags?:\b/i,
+  /\brelated articles?\b/i,
+  /\bread the full (story|post)\b/i
+];
+const SUMMARY_RESIDUE_PATTERNS_ZH = [
+  /\u539f\u6587\u94fe\u63a5/,
+  /\u9605\u8bfb\u539f\u6587/,
+  /\u66f4\u591a\u5185\u5bb9/,
+  /\u6765\u6e90[:\uFF1A]/,
+  /\u8f6c\u8f7d/
+];
+const SOFT_CONTENT_DOMAINS = new Set(['culture_design', 'lifestyle_signals']);
+const SOFT_CONTENT_TITLE_PATTERNS = [
+  /\breview\b/i,
+  /\bfirst look\b/i,
+  /\bimpressions\b/i,
+  /\bguide\b/i,
+  /\bbest\b/i,
+  /\btop\s+\d+\b/i
+];
 
 function addWarning(target, code, message, severity = 'warning') {
   if (!target.some((warning) => warning.code === code)) {
@@ -142,6 +182,35 @@ function buildSummaryFromSentences({ sentences, language, minWords, maxWords, mi
   return ensureTerminalPunctuation(cleaned, language);
 }
 
+function stripTrailingEllipsis(text) {
+  return normalizeWhitespace(text).replace(/(\.\.\.|…)+$/u, '').trim();
+}
+
+function cleanSummaryResidue(summary, language) {
+  const normalized = normalizeWhitespace(summary);
+  if (!normalized) {
+    return normalized;
+  }
+
+  const patterns = language === 'zh' ? SUMMARY_RESIDUE_PATTERNS_ZH : SUMMARY_RESIDUE_PATTERNS_EN;
+  if (patterns.length === 0) {
+    return ensureTerminalPunctuation(stripTrailingEllipsis(normalized), language);
+  }
+
+  const sentences = splitSentences(normalized, language);
+  if (sentences.length === 0) {
+    return ensureTerminalPunctuation(stripTrailingEllipsis(normalized), language);
+  }
+
+  const retained = sentences.filter((sentence) => !patterns.some((pattern) => pattern.test(sentence)));
+  if (retained.length === 0) {
+    return ensureTerminalPunctuation(stripTrailingEllipsis(normalized), language);
+  }
+
+  const joined = language === 'zh' ? retained.join('') : retained.join(' ');
+  return ensureTerminalPunctuation(stripTrailingEllipsis(joined), language);
+}
+
 function splitSentences(text, language) {
   const normalized = normalizeWhitespace(text);
   if (!normalized) {
@@ -221,12 +290,13 @@ function summarizeFactually(record, rules, warnings) {
       minWords: hasFullText ? rules.summary_rules.english_min_words : rules.summary_rules.english_summary_only_min_words,
       maxWords: hasFullText ? rules.summary_rules.english_max_words : rules.summary_rules.english_summary_only_max_words
     });
+  const cleanedSummary = cleanSummaryResidue(summary, language);
 
   if (!hasFullText && !hasSnippet && !hasSummary) {
     addWarning(warnings, 'summary_limited_context', 'Summary is constrained by limited feed text.', 'info');
   }
 
-  return summary;
+  return cleanedSummary;
 }
 
 function scoreKeywordMatches(textBlob, keywordMap) {
@@ -532,6 +602,20 @@ function eventTypeLabel(eventType, language) {
   return map[eventType] ?? '重要动态';
 }
 
+function isSoftContentCandidate(record, topicLabels) {
+  if (!Array.isArray(topicLabels) || !topicLabels.some((label) => SOFT_CONTENT_DOMAINS.has(label))) {
+    return false;
+  }
+
+  const articleType = record.article_type ?? '';
+  if (['review', 'lifestyle', 'service'].includes(articleType)) {
+    return true;
+  }
+
+  const title = record.title ?? '';
+  return SOFT_CONTENT_TITLE_PATTERNS.some((pattern) => pattern.test(title));
+}
+
 function buildWhySubject(entities, geographies, eventType, language) {
   const primaryEntity = entities.primary[0] ?? null;
   if (primaryEntity && geographies.primary) {
@@ -571,7 +655,7 @@ function buildWhyImpactPhrase(topicLabels, strategicDimensions, language) {
 
 function buildWhyAngleEn(eventType) {
   const templates = {
-    policy_move: 'it signals where policy priorities are tightening or loosening and how enforcement will land',
+    policy_move: 'it clarifies how policy priorities are tightening or loosening and where enforcement will land',
     regulatory_shift: 'it changes compliance costs and competitive constraints for operators',
     legal_action: 'it changes legal risk and settlement leverage for affected players',
     earnings_result: 'it shows how demand, margins, or guidance are shifting for operators and investors',
@@ -582,8 +666,8 @@ function buildWhyAngleEn(eventType) {
     infrastructure_project: 'it sets a new baseline for capacity, logistics, or mobility decisions',
     scientific_finding: 'it updates the evidence base used for policy or investment decisions',
     conflict_escalation: 'it raises cross-border risk assumptions and policy responses',
-    long_form_analysis: 'it provides a frame for interpreting upcoming policy or market decisions',
-    opinion_or_argument: 'it signals the narrative influencing decision-makers and market sentiment'
+    long_form_analysis: 'it clarifies the assumptions behind upcoming policy or market decisions',
+    opinion_or_argument: 'it highlights the narrative influencing decision-makers and market sentiment'
   };
 
   return templates[eventType] ?? 'it sets a clear signal for how to read the next decision cycle';
@@ -602,7 +686,7 @@ function buildWhyAngleEnCompact(eventType) {
     infrastructure_project: 'capacity baselines are changing',
     scientific_finding: 'evidence used for decisions is updating',
     conflict_escalation: 'risk assumptions are rising',
-    long_form_analysis: 'the decision frame is shifting',
+    long_form_analysis: 'decision assumptions are shifting',
     opinion_or_argument: 'the narrative shaping decisions is shifting'
   };
 
@@ -673,14 +757,14 @@ function buildWhySecondaryClauseZh(topicLabels, strategicDimensions) {
   return '';
 }
 
-function buildWhyItMattersEn({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules }) {
+function buildWhyItMattersEn({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules, useCompactAngle = false }) {
   const minWords = rules.summary_rules.why_it_matters_min_words;
   const maxWords = rules.summary_rules.why_it_matters_max_words;
-  const angle = buildWhyAngleEn(eventType);
+  const angle = useCompactAngle ? buildWhyAngleEnCompact(eventType) : buildWhyAngleEn(eventType);
   const compactAngle = buildWhyAngleEnCompact(eventType);
 
   let sentence = `${subject} matters for ${impactPhrase} because ${angle}.`;
-  if (countWords(sentence) > maxWords) {
+  if (!useCompactAngle && countWords(sentence) > maxWords) {
     sentence = `${subject} matters for ${impactPhrase} because ${compactAngle}.`;
   }
   if (countWords(sentence) > maxWords) {
@@ -696,10 +780,10 @@ function buildWhyItMattersEn({ subject, impactPhrase, eventType, topicLabels, st
   return ensureTerminalPunctuation(sentence, 'en');
 }
 
-function buildWhyItMattersZh({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules }) {
+function buildWhyItMattersZh({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules, useCompactAngle = false }) {
   const minChars = rules.summary_rules.why_it_matters_min_chars;
   const maxChars = rules.summary_rules.why_it_matters_max_chars;
-  const angle = buildWhyAngleZh(eventType);
+  const angle = useCompactAngle ? buildWhyAngleZhCompact(eventType) : buildWhyAngleZh(eventType);
   const compactAngle = buildWhyAngleZhCompact(eventType);
 
   let sentence = `${subject}对${impactPhrase}很关键，因为${angle}。`;
@@ -727,10 +811,11 @@ function buildWhyItMatters(record, entities, geographies, eventType, topicLabels
 
   const subject = buildWhySubject(entities, geographies, eventType, effectiveLanguage);
   const impactPhrase = buildWhyImpactPhrase(topicLabels, strategicDimensions, effectiveLanguage);
+  const useCompactAngle = isSoftContentCandidate(record, topicLabels);
 
   return effectiveLanguage === 'zh'
-    ? buildWhyItMattersZh({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules })
-    : buildWhyItMattersEn({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules });
+    ? buildWhyItMattersZh({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules, useCompactAngle })
+    : buildWhyItMattersEn({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules, useCompactAngle });
 }
 
 function computeOverlap(summary, whyItMatters, rules) {

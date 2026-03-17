@@ -183,6 +183,22 @@ test('summary length policy distinguishes full-text and summary-only items', () 
   assert.equal(summaryOnlyWords <= 70, true);
 });
 
+test('summary cleanup removes feed residue fragments', () => {
+  const record = makeCanonicalMainRecord({
+    article_id: 'summary-residue-1',
+    canonical_text: '',
+    raw_snippet: 'The post Export plan appeared first on Example Feed. Regulators outlined an export plan affecting advanced chips and supplier exposure across multiple regions.'
+  });
+
+  const result = buildSemanticCards({
+    canonicalRecords: [record]
+  });
+
+  const summary = result.cards[0].factual_summary;
+  assert.doesNotMatch(summary, /appeared first on/i);
+  assert.match(summary, /export plan/i);
+});
+
 test('why_it_matters stays within intended quality bounds', () => {
   const result = buildSemanticCards({
     canonicalRecords: [makeCanonicalMainRecord()]
