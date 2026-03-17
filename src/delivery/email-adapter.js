@@ -56,6 +56,21 @@ function isValidEmailAddress(value) {
   return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+function parseRecipientList(value) {
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => (typeof entry === 'string' ? entry.trim() : ''))
+      .filter((entry) => entry.length > 0);
+  }
+  if (typeof value !== 'string') {
+    return [];
+  }
+  return value
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+}
+
 function resolveSmtpSettings(destination) {
   return {
     host: process.env.GMAIL_SMTP_HOST || 'smtp.gmail.com',
@@ -112,6 +127,9 @@ export class EmailDeliveryAdapter {
 
     if (this.mode === 'gmail-smtp') {
       const smtp = resolveSmtpSettings(destination);
+      const recipients = parseRecipientList(smtp.to);
+      const invalidRecipients = recipients.filter((recipient) => !isValidEmailAddress(recipient));
+      const destinationLabel = recipients.join(', ');
       if (!smtp.user) {
         return buildResult({
           channel: 'email',
@@ -151,7 +169,7 @@ export class EmailDeliveryAdapter {
           providerMode: this.mode
         });
       }
-      if (!smtp.to) {
+      if (recipients.length === 0) {
         return buildResult({
           channel: 'email',
           destination: null,
@@ -164,16 +182,19 @@ export class EmailDeliveryAdapter {
           providerMode: this.mode
         });
       }
-      if (!isValidEmailAddress(smtp.to)) {
+      if (invalidRecipients.length > 0) {
         return buildResult({
           channel: 'email',
-          destination: smtp.to,
+          destination: destinationLabel,
           status: 'failed',
           success: false,
           dryRun: false,
           actualSend: false,
           attemptTimestamp: now,
-          error: buildError('INVALID_EMAIL_DESTINATION', `Email destination "${smtp.to}" is not a valid email address.`),
+          error: buildError(
+            'INVALID_EMAIL_DESTINATION',
+            `Email destination list contains invalid address(es): ${invalidRecipients.join(', ')}.`
+          ),
           providerMode: this.mode
         });
       }
@@ -195,14 +216,14 @@ export class EmailDeliveryAdapter {
           ?? `DIBS Briefing ${bundle.run_timestamp?.slice(0, 10) ?? ''}`.trim();
         const info = await transporter.sendMail({
           from: smtp.from,
-          to: smtp.to,
+          to: recipients,
           subject,
           text: bundle.artifacts.email.content
         });
 
         return buildResult({
           channel: 'email',
-          destination: smtp.to,
+          destination: destinationLabel,
           status: 'success',
           success: true,
           dryRun: false,
@@ -219,7 +240,7 @@ export class EmailDeliveryAdapter {
       } catch (error) {
         return buildResult({
           channel: 'email',
-          destination: smtp.to,
+          destination: destinationLabel,
           status: 'failed',
           success: false,
           dryRun: false,

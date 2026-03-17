@@ -302,6 +302,106 @@ test('gmail-smtp mode validates required config and env correctly', async () => 
   });
 });
 
+test('gmail-smtp accepts multiple recipients and trims whitespace', async () => {
+  await withTempDir(async (directory) => {
+    const bundle = {
+      output_dir: directory,
+      run_timestamp: FIXED_NOW.toISOString(),
+      artifacts: {
+        email: {
+          content: 'Email body'
+        }
+      }
+    };
+
+    await withPatchedEnv({
+      GMAIL_SMTP_USER: 'sender@example.com',
+      GMAIL_SMTP_APP_PASSWORD: 'app-password',
+      GMAIL_FROM_ADDRESS: 'sender@example.com'
+    }, async () => {
+      let capturedTo = null;
+      const adapter = new EmailDeliveryAdapter({
+        mode: 'gmail-smtp',
+        transport: {
+          sendMail: async (message) => {
+            capturedTo = message.to;
+            return {
+              messageId: '<message-id@example.com>',
+              accepted: message.to
+            };
+          }
+        }
+      });
+
+      const result = await adapter.deliver({
+        bundle,
+        destination: ' person1@gmail.com, person2@qq.com , , person3@163.com '
+      });
+
+      assert.equal(result.status, 'success');
+      assert.deepEqual(capturedTo, ['person1@gmail.com', 'person2@qq.com', 'person3@163.com']);
+      assert.equal(result.destination, 'person1@gmail.com, person2@qq.com, person3@163.com');
+    });
+  });
+});
+
+test('gmail-smtp rejects invalid recipient list', async () => {
+  await withTempDir(async (directory) => {
+    const bundle = {
+      output_dir: directory,
+      run_timestamp: FIXED_NOW.toISOString(),
+      artifacts: {
+        email: {
+          content: 'Email body'
+        }
+      }
+    };
+
+    await withPatchedEnv({
+      GMAIL_SMTP_USER: 'sender@example.com',
+      GMAIL_SMTP_APP_PASSWORD: 'app-password',
+      GMAIL_FROM_ADDRESS: 'sender@example.com'
+    }, async () => {
+      const adapter = new EmailDeliveryAdapter({ mode: 'gmail-smtp' });
+      const result = await adapter.deliver({
+        bundle,
+        destination: 'good@example.com, bad@@example.com'
+      });
+      assert.equal(result.status, 'failed');
+      assert.equal(result.error.code, 'INVALID_EMAIL_DESTINATION');
+      assert.match(result.error.message, /bad@@example\.com/);
+    });
+  });
+});
+
+test('gmail-smtp rejects empty recipient list', async () => {
+  await withTempDir(async (directory) => {
+    const bundle = {
+      output_dir: directory,
+      run_timestamp: FIXED_NOW.toISOString(),
+      artifacts: {
+        email: {
+          content: 'Email body'
+        }
+      }
+    };
+
+    await withPatchedEnv({
+      GMAIL_SMTP_USER: 'sender@example.com',
+      GMAIL_SMTP_APP_PASSWORD: 'app-password',
+      GMAIL_FROM_ADDRESS: 'sender@example.com'
+    }, async () => {
+      const adapter = new EmailDeliveryAdapter({ mode: 'gmail-smtp' });
+      const result = await adapter.deliver({
+        bundle,
+        destination: ' , , '
+      });
+      assert.equal(result.status, 'failed');
+      assert.equal(result.error.code, 'MISSING_EMAIL_DESTINATION');
+    });
+  });
+});
+
 test('telegram-bot-api mode validates required config and env correctly', async () => {
   await withTempDir(async (directory) => {
     const bundle = {
