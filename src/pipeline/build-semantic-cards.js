@@ -32,40 +32,8 @@ const SUMMARY_RESIDUE_PATTERNS_ZH = [
 const GENERIC_WHY_PHRASES_EN = [
   /provides a frame/i,
   /clarifies the assumptions/i,
-  /sets expectations/i,
   /decision frame/i,
   /decision assumptions/i
-];
-const SUMMARY_RESIDUE_PATTERNS_EN = [
-  /the post\b.*\bappeared first on/i,
-  /\bappeared first on\b/i,
-  /\bwas originally published on\b/i,
-  /\boriginally appeared on\b/i,
-  /\boriginally published at\b/i,
-  /\bthis article was originally published\b/i,
-  /\bcontinue reading\b/i,
-  /\bread more\b/i,
-  /\bclick here\b/i,
-  /\bsubscribe\b/i,
-  /\bview the full post\b/i,
-  /\bshare this post\b/i,
-  /\bprimary image\b/i,
-  /\bfeatured image\b/i,
-  /\bimage credit\b/i,
-  /\bphoto credit\b/i,
-  /\bposted in\b/i,
-  /\bfiled under\b/i,
-  /\bcategory:\b/i,
-  /\btags?:\b/i,
-  /\brelated articles?\b/i,
-  /\bread the full (story|post)\b/i
-];
-const SUMMARY_RESIDUE_PATTERNS_ZH = [
-  /\u539f\u6587\u94fe\u63a5/,
-  /\u9605\u8bfb\u539f\u6587/,
-  /\u66f4\u591a\u5185\u5bb9/,
-  /\u6765\u6e90[:\uFF1A]/,
-  /\u8f6c\u8f7d/
 ];
 const SOFT_CONTENT_DOMAINS = new Set(['culture_design', 'lifestyle_signals']);
 const SOFT_CONTENT_TITLE_PATTERNS = [
@@ -75,13 +43,6 @@ const SOFT_CONTENT_TITLE_PATTERNS = [
   /\bguide\b/i,
   /\bbest\b/i,
   /\btop\s+\d+\b/i
-];
-const GENERIC_WHY_PHRASES_EN = [
-  /provides a frame/i,
-  /clarifies the assumptions/i,
-  /sets expectations/i,
-  /decision frame/i,
-  /decision assumptions/i
 ];
 
 function addWarning(target, code, message, severity = 'warning') {
@@ -134,15 +95,43 @@ function stripTrailingEllipsis(text) {
   return normalizeWhitespace(text).replace(/(\.\.\.|…)+$/u, '').trim();
 }
 
+function ensureTerminalPunctuation(text, language) {
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    return '';
+  }
+  if (language === 'zh') {
+    return /[。！？]$/.test(normalized) ? normalized : `${normalized}。`;
+  }
+  return /[.!?]$/.test(normalized) ? normalized : `${normalized}.`;
+}
+
 function isSummaryComplete(text, language) {
   const normalized = normalizeWhitespace(text);
   if (!normalized) {
     return false;
   }
   if (language === 'zh') {
-    return /[銆傦紒锛焆$/.test(normalized) && countChineseChars(normalized) >= 24;
+    return /[，。！？；：、]$/.test(normalized) && countChineseChars(normalized) >= 24;
   }
   return /[.!?]$/.test(normalized) && countWords(normalized) >= 12;
+}
+
+function splitSentencesNormalized(text, language) {
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    return [];
+  }
+
+  if (language === 'zh') {
+    const matches = normalized.match(/[^。！？]+[。！？]?/gu) ?? [];
+    return matches.map((sentence) => sentence.trim()).filter(Boolean);
+  }
+
+  return normalized
+    .split(/(?<=[.!?])\s+/u)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
 }
 
 function stripResidueFromSentence(sentence, language) {
@@ -180,32 +169,20 @@ function cleanSummaryResidue(summary, language) {
   return ensureTerminalPunctuation(stripTrailingEllipsis(joined), language);
 }
 
-function ensureTerminalPunctuation(text, language) {
-  const normalized = normalizeWhitespace(text);
+function isSentenceSubstantial(sentence, language) {
+  const normalized = normalizeWhitespace(sentence);
   if (!normalized) {
-    return '';
+    return false;
   }
   if (language === 'zh') {
-    return /[。！？]$/.test(normalized) ? normalized : `${normalized}。`;
+    return countChineseChars(normalized) >= 12;
   }
-  return /[.!?]$/.test(normalized) ? normalized : `${normalized}.`;
+  return countWords(normalized) >= 6;
 }
 
-function splitSentencesNormalized(text, language) {
-  const normalized = normalizeWhitespace(text);
-  if (!normalized) {
-    return [];
-  }
-
-  if (language === 'zh') {
-    const matches = normalized.match(/[^。！？]+[。！？]?/gu) ?? [];
-    return matches.map((sentence) => sentence.trim()).filter(Boolean);
-  }
-
-  return normalized
-    .split(/(?<=[.!?])\s+/u)
-    .map((sentence) => sentence.trim())
-    .filter(Boolean);
+function filterSummaryCandidates(sentences, language) {
+  const filtered = sentences.filter((sentence) => isSentenceSubstantial(sentence, language));
+  return filtered.length > 0 ? filtered : sentences;
 }
 
 function collectSentences(texts, language) {
@@ -265,105 +242,8 @@ function buildSummaryFromSentences({ sentences, language, minWords, maxWords, mi
   }
 
   const joined = isChinese ? selected.join('') : selected.join(' ');
-  const cleaned = joined.replace(/(\.\.\.|…)+$/u, '').trim();
+  const cleaned = stripTrailingEllipsis(joined);
   return ensureTerminalPunctuation(cleaned, language);
-}
-
-function stripTrailingEllipsis(text) {
-  return normalizeWhitespace(text).replace(/(\.\.\.|…)+$/u, '').trim();
-}
-
-function cleanSummaryResidue(summary, language) {
-  const normalized = normalizeWhitespace(summary);
-  if (!normalized) {
-    return normalized;
-  }
-
-  const patterns = language === 'zh' ? SUMMARY_RESIDUE_PATTERNS_ZH : SUMMARY_RESIDUE_PATTERNS_EN;
-  if (patterns.length === 0) {
-    return ensureTerminalPunctuation(stripTrailingEllipsis(normalized), language);
-  }
-
-  const sentences = splitSentences(normalized, language);
-  if (sentences.length === 0) {
-    return ensureTerminalPunctuation(stripTrailingEllipsis(normalized), language);
-  }
-
-  const retained = sentences
-    .map((sentence) => stripResidueFromSentence(sentence, language))
-    .filter(Boolean)
-    .filter((sentence) => (language === 'zh' ? countChineseChars(sentence) >= 12 : countWords(sentence) >= 6));
-  if (retained.length === 0) {
-    return ensureTerminalPunctuation(stripTrailingEllipsis(normalized), language);
-  }
-
-  const joined = language === 'zh' ? retained.join('') : retained.join(' ');
-  return ensureTerminalPunctuation(stripTrailingEllipsis(joined), language);
-}
-
-function isSummaryComplete(text, language) {
-  const normalized = normalizeWhitespace(text);
-  if (!normalized) {
-    return false;
-  }
-  if (language === 'zh') {
-    return /[銆傦紒锛焆$/.test(normalized) && countChineseChars(normalized) >= 24;
-  }
-  return /[.!?]$/.test(normalized) && countWords(normalized) >= 12;
-}
-
-function stripResidueFromSentence(sentence, language) {
-  const patterns = language === 'zh' ? SUMMARY_RESIDUE_PATTERNS_ZH : SUMMARY_RESIDUE_PATTERNS_EN;
-  let trimmed = sentence;
-  for (const pattern of patterns) {
-    const index = trimmed.search(pattern);
-    if (index >= 0) {
-      trimmed = trimmed.slice(0, index).trim();
-    }
-  }
-  return trimmed;
-}
-
-function splitSentences(text, language) {
-  const normalized = normalizeWhitespace(text);
-  if (!normalized) {
-    return [];
-  }
-
-  const splitter = language === 'zh'
-    ? /(?<=[。！？])/u
-    : /(?<=[.!?])\s+/u;
-
-  return normalized
-    .split(splitter)
-    .map((sentence) => sentence.trim())
-    .filter(Boolean);
-}
-
-function pickLeadSentence(record, language) {
-  const candidates = [
-    ...(record.canonical_text ? splitSentences(record.canonical_text, language) : []),
-    ...(record.raw_snippet ? splitSentences(record.raw_snippet, language) : []),
-    ...(record.source_provided_summary ? splitSentences(record.source_provided_summary, language) : []),
-    record.title
-  ];
-
-  for (const candidate of candidates) {
-    if (candidate && candidate.length >= 20) {
-      return candidate;
-    }
-  }
-
-  return record.title;
-}
-
-function truncateForLanguage(text, language, maxChars) {
-  const normalized = normalizeWhitespace(text);
-  if (normalized.length <= maxChars) {
-    return normalized;
-  }
-
-  return `${normalized.slice(0, maxChars - 1).trim()}…`;
 }
 
 function summarizeFactually(record, rules, warnings) {
@@ -371,59 +251,91 @@ function summarizeFactually(record, rules, warnings) {
   const language = rules.language_behavior.factual_summary_same_as_source
     ? sourceLanguage
     : (rules.language_behavior.fallback_language || 'en');
+
   const hasFullText = typeof record.canonical_text === 'string'
     && record.canonical_text.length >= rules.summary_rules.full_text_min_chars;
-  const hasSnippet = typeof record.raw_snippet === 'string' && record.raw_snippet.length >= rules.summary_rules.summary_only_min_chars;
-  const hasSummary = typeof record.source_provided_summary === 'string' && record.source_provided_summary.length >= rules.summary_rules.summary_only_min_chars;
+  const hasSnippet = typeof record.raw_snippet === 'string'
+    && record.raw_snippet.length >= rules.summary_rules.summary_only_min_chars;
+  const hasSummary = typeof record.source_provided_summary === 'string'
+    && record.source_provided_summary.length >= rules.summary_rules.summary_only_min_chars;
 
   const primaryTexts = hasFullText
     ? [record.canonical_text, record.raw_snippet, record.source_provided_summary]
     : [record.raw_snippet, record.source_provided_summary, record.canonical_text];
 
   const sentences = collectSentences(primaryTexts.filter(Boolean), language);
-  if (sentences.length === 0 && record.title) {
-    sentences.push(record.title);
-    addWarning(warnings, 'summary_from_title', 'Factual summary falls back to the headline because no other text was available.', 'info');
+  const summarySentences = filterSummaryCandidates(sentences, language);
+
+  if (summarySentences.length === 0 && record.title) {
+    summarySentences.push(record.title);
+    addWarning(
+      warnings,
+      'summary_from_title',
+      'Factual summary falls back to the headline because no other text was available.',
+      'info'
+    );
   }
 
   if (!hasFullText) {
-    addWarning(warnings, 'weak_canonical_text', 'Canonical text is limited; summary leans on feed snippets or summaries.', 'warning');
+    addWarning(
+      warnings,
+      'weak_canonical_text',
+      'Canonical text is limited; summary leans on feed snippets or summaries.',
+      'warning'
+    );
   }
 
   const summary = language === 'zh'
     ? buildSummaryFromSentences({
-      sentences,
-      language,
-      minChars: hasFullText ? rules.summary_rules.non_english_min_chars : rules.summary_rules.non_english_summary_only_min_chars,
-      maxChars: hasFullText ? rules.summary_rules.non_english_max_chars : rules.summary_rules.non_english_summary_only_max_chars
-    })
+        sentences: summarySentences,
+        language,
+        minChars: hasFullText
+          ? rules.summary_rules.non_english_min_chars
+          : rules.summary_rules.non_english_summary_only_min_chars,
+        maxChars: hasFullText
+          ? rules.summary_rules.non_english_max_chars
+          : rules.summary_rules.non_english_summary_only_max_chars
+      })
     : buildSummaryFromSentences({
-      sentences,
-      language,
-      minWords: hasFullText ? rules.summary_rules.english_min_words : rules.summary_rules.english_summary_only_min_words,
-      maxWords: hasFullText ? rules.summary_rules.english_max_words : rules.summary_rules.english_summary_only_max_words
-    });
+        sentences: summarySentences,
+        language,
+        minWords: hasFullText
+          ? rules.summary_rules.english_min_words
+          : rules.summary_rules.english_summary_only_min_words,
+        maxWords: hasFullText
+          ? rules.summary_rules.english_max_words
+          : rules.summary_rules.english_summary_only_max_words
+      });
+
   let cleanedSummary = cleanSummaryResidue(summary, language);
 
   if (!isSummaryComplete(cleanedSummary, language)) {
-    const fallbackSentences = sentences
+    const fallbackSentences = summarySentences
       .map((sentence) => stripResidueFromSentence(sentence, language))
       .filter(Boolean);
 
     if (fallbackSentences.length > 0) {
       const fallbackSummary = language === 'zh'
         ? buildSummaryFromSentences({
-          sentences: fallbackSentences,
-          language,
-          minChars: hasFullText ? rules.summary_rules.non_english_min_chars : rules.summary_rules.non_english_summary_only_min_chars,
-          maxChars: hasFullText ? rules.summary_rules.non_english_max_chars : rules.summary_rules.non_english_summary_only_max_chars
-        })
+            sentences: fallbackSentences,
+            language,
+            minChars: hasFullText
+              ? rules.summary_rules.non_english_min_chars
+              : rules.summary_rules.non_english_summary_only_min_chars,
+            maxChars: hasFullText
+              ? rules.summary_rules.non_english_max_chars
+              : rules.summary_rules.non_english_summary_only_max_chars
+          })
         : buildSummaryFromSentences({
-          sentences: fallbackSentences,
-          language,
-          minWords: hasFullText ? rules.summary_rules.english_min_words : rules.summary_rules.english_summary_only_min_words,
-          maxWords: hasFullText ? rules.summary_rules.english_max_words : rules.summary_rules.english_summary_only_max_words
-        });
+            sentences: fallbackSentences,
+            language,
+            minWords: hasFullText
+              ? rules.summary_rules.english_min_words
+              : rules.summary_rules.english_summary_only_min_words,
+            maxWords: hasFullText
+              ? rules.summary_rules.english_max_words
+              : rules.summary_rules.english_summary_only_max_words
+          });
 
       cleanedSummary = cleanSummaryResidue(fallbackSummary, language);
     }
@@ -434,11 +346,20 @@ function summarizeFactually(record, rules, warnings) {
   }
 
   if (!hasFullText && !hasSnippet && !hasSummary) {
-    addWarning(warnings, 'summary_limited_context', 'Summary is constrained by limited feed text.', 'info');
+    addWarning(
+      warnings,
+      'summary_limited_context',
+      'Summary is constrained by limited feed text.',
+      'info'
+    );
   }
 
   return cleanedSummary;
 }
+
+
+
+
 
 function scoreKeywordMatches(textBlob, keywordMap) {
   const normalized = normalizeTitleForComparison(textBlob);
@@ -741,6 +662,26 @@ function eventTypeLabel(eventType, language) {
     opinion_or_argument: '观点文章'
   };
   return map[eventType] ?? '重要动态';
+}
+
+function eventTypeNounEn(eventType) {
+  const map = {
+    policy_move: 'policy move',
+    earnings_result: 'earnings result',
+    regulatory_shift: 'regulatory shift',
+    product_launch: 'product launch',
+    infrastructure_project: 'infrastructure project',
+    conflict_escalation: 'conflict escalation',
+    market_signal: 'market signal',
+    long_form_analysis: 'analysis',
+    executive_change: 'executive change',
+    scientific_finding: 'scientific finding',
+    legal_action: 'legal action',
+    funding_or_deal: 'funding or deal',
+    opinion_or_argument: 'opinion piece'
+  };
+
+  return map[eventType] ?? eventType.replace(/_/g, ' ');
 }
 
 function isSoftContentCandidate(record, topicLabels) {
