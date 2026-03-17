@@ -1,6 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { loadEditorialRules, loadSemanticTaxonomy } from '../config/load-config.js';
+import { loadEditorialRules, loadSemanticTaxonomy, loadSourceCatalog } from '../config/load-config.js';
 import { createEditorialSelectionResult, createSelectedItem } from '../models/editorial-selection.js';
 import { validateSemanticCard } from '../models/semantic-card.js';
 import { clusterSemanticCards } from './cluster-semantic-cards.js';
@@ -8,6 +8,7 @@ import { buildTokenFingerprint, diceCoefficient, jaccardSimilarity } from '../ut
 
 const DEFAULT_EDITORIAL_RULES_PATH = resolve(process.cwd(), 'config', 'editorial-rules.json');
 const DEFAULT_SEMANTIC_TAXONOMY_PATH = resolve(process.cwd(), 'config', 'semantic-taxonomy.json');
+const DEFAULT_SOURCES_PATH = resolve(process.cwd(), 'config', 'sources.json');
 
 function clamp(value, minimum = 0, maximum = 1) {
   return Math.max(minimum, Math.min(maximum, value));
@@ -46,8 +47,14 @@ function getSourceClass(card) {
   return card.metadata?.source_class ?? 'unknown';
 }
 
-function getSourceDisplayName(card) {
-  return card.metadata?.source_display_name ?? card.source_id;
+function getSourceDisplayName(card, sourceCatalog) {
+  return sourceCatalog.sources.get(card.source_id)?.display_name
+    ?? card.metadata?.source_display_name
+    ?? card.source_id;
+}
+
+function getAuthorByline(card) {
+  return card.metadata?.canonical_author ?? null;
 }
 
 function getExtractionQuality(card) {
@@ -200,7 +207,7 @@ function compareScoredCandidates(left, right) {
   return left.article_id.localeCompare(right.article_id);
 }
 
-function scoreSemanticCards(cards, clusters, runTimestamp, rules) {
+function scoreSemanticCards(cards, clusters, runTimestamp, rules, sourceCatalog) {
   const domainNeedMap = buildDomainNeedMap(cards, rules);
   const clusterByArticleId = new Map();
   for (const cluster of clusters) {
@@ -233,7 +240,8 @@ function scoreSemanticCards(cards, clusters, runTimestamp, rules) {
       article_id: card.article_id,
       cluster_id: cluster.cluster_id,
       source_id: card.source_id,
-      source_display_name: getSourceDisplayName(card),
+      source_display_name: getSourceDisplayName(card, sourceCatalog),
+      author_byline: getAuthorByline(card),
       source_class: getSourceClass(card),
       title: card.title,
       url: card.url,
@@ -429,6 +437,7 @@ function selectCandidate({
     cluster_id: candidate.cluster_id,
     source_id: candidate.source_id,
     source_display_name: candidate.source_display_name,
+    author_byline: candidate.author_byline,
     source_class: candidate.source_class,
     title: candidate.title,
     url: candidate.url,
@@ -640,10 +649,12 @@ export function buildEditorialSelection({
   outputDir = null,
   runTimestamp = new Date().toISOString(),
   editorialRulesPath = DEFAULT_EDITORIAL_RULES_PATH,
-  taxonomyPath = DEFAULT_SEMANTIC_TAXONOMY_PATH
+  taxonomyPath = DEFAULT_SEMANTIC_TAXONOMY_PATH,
+  sourcesPath = DEFAULT_SOURCES_PATH
 }) {
   const rules = loadEditorialRules(editorialRulesPath);
   const taxonomy = loadSemanticTaxonomy(taxonomyPath);
+  const sourceCatalog = loadSourceCatalog(sourcesPath);
 
   for (const card of semanticCards) {
     validateSemanticCard(card, taxonomy);
@@ -653,7 +664,7 @@ export function buildEditorialSelection({
   }
 
   const { clusters, card_cluster_index: clusterIndex } = clusterSemanticCards(semanticCards, rules);
-  const { domainNeedMap, scored_candidates: scoredCandidates } = scoreSemanticCards(semanticCards, clusters, runTimestamp, rules);
+  const { domainNeedMap, scored_candidates: scoredCandidates } = scoreSemanticCards(semanticCards, clusters, runTimestamp, rules, sourceCatalog);
   const knownClusterIds = new Set(clusters.map((cluster) => cluster.cluster_id));
   const candidateLookup = buildCandidateLookup(scoredCandidates);
   const exclusionReasons = initializeExclusionState(scoredCandidates, rules);
@@ -807,6 +818,7 @@ export function buildEditorialSelection({
     cluster_id: candidate.cluster_id,
     source_id: candidate.source_id,
     source_display_name: candidate.source_display_name,
+    author_byline: candidate.author_byline,
     source_class: candidate.source_class,
     title: candidate.title,
     url: candidate.url,

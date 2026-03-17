@@ -1,0 +1,1867 @@
+{
+  "config_version": "2026-03-16",
+  "defaults": {
+    "support_status_by_fetch_method": {
+      "rss": "pending_review",
+      "website": "pending_review",
+      "newsletter": "unsupported",
+      "api": "unsupported",
+      "manual": "unsupported"
+    },
+    "default_notes_by_status": {
+      "supported": "Supported by a verified public feed or governed feed-like endpoint configured in this repository.",
+      "partial": "A concrete governed ingestion path is configured, but coverage is limited, summary-only, or not yet fully validated across live runs.",
+      "unsupported": "No repository-safe public ingestion path is currently configured, but the source remains in governed inventory for coverage visibility.",
+      "pending_review": "The source remains governed and visible, but a concrete public ingestion path still needs validation.",
+      "restricted": "The source is governed but operationally restricted because it depends on subscription, productized, or otherwise non-repository-safe access.",
+      "unstable": "A public ingestion path exists, but reliability or parsing stability concerns currently keep it out of normal supported coverage.",
+      "inactive": "The source is intentionally inactive in the live-input layer."
+    },
+    "support_level_by_status": {
+      "supported": "validated_public_feed",
+      "partial": "limited_or_unvalidated_feed",
+      "unsupported": "no_repo_safe_public_feed",
+      "pending_review": "needs_source_review",
+      "restricted": "restricted_or_authenticated_access",
+      "unstable": "operationally_unstable_feed",
+      "inactive": "inactive_source"
+    },
+    "ingestion_method_defaults_by_fetch_method": {
+      "rss": "rss",
+      "website": "none",
+      "newsletter": "none",
+      "api": "none",
+      "manual": "none"
+    },
+    "adapter_type_defaults_by_fetch_method": {
+      "rss": "xml_feed",
+      "website": "none",
+      "newsletter": "none",
+      "api": "none",
+      "manual": "none"
+    }
+  },
+  "sources": {
+    "reuters": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "Reuters provides licensed newsroom feeds and productized syndication surfaces, but no repository-safe public RSS endpoint is configured for this project.",
+      "feed_definitions": []
+    },
+    "bloomberg": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "Bloomberg exposes subscription and terminal-linked content products rather than a repository-safe public feed endpoint for automated ingestion here.",
+      "feed_definitions": []
+    },
+    "financial-times": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "Financial Times content is governed and important, but no public repository-safe feed endpoint is configured for this project.",
+      "feed_definitions": []
+    },
+    "wall-street-journal": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "Wall Street Journal content is paywalled and no repository-safe public feed endpoint is configured for automated ingestion.",
+      "feed_definitions": []
+    },
+    "nikkei-asia": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "Nikkei Asia remains in the governed universe, but this repo does not currently maintain a public feed path that is reliable enough for automated runs.",
+      "feed_definitions": []
+    },
+    "associated-press": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "The source remains governed and visible, but a concrete public ingestion path still needs validation.",
+      "feed_definitions": []
+    },
+    "bbc-news": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through BBC's public newsroom RSS endpoint.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "BBC News Home",
+          "url": "https://feeds.bbci.co.uk/news/rss.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "politico-europe": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Politico Europe remains governed, but a reliable Europe-specific public feed path was not fully validated in this environment.",
+      "feed_definitions": []
+    },
+    "south-china-morning-post": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "SCMP public RSS coverage appears available, but endpoint stability and section mapping need more live validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "china",
+          "label": "China",
+          "url": "https://www.scmp.com/rss/91/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "channel-newsasia": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through CNA's official RSS directory.",
+      "feed_definitions": [
+        {
+          "feed_id": "top-stories",
+          "label": "Top Stories",
+          "url": "https://www.channelnewsasia.com/rssfeeds/8395986",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "straits-times": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through The Straits Times official RSS directory.",
+      "feed_definitions": [
+        {
+          "feed_id": "asia",
+          "label": "Asia",
+          "url": "https://www.straitstimes.com/news/asia/rss.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "wsj-cn-daily": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "This governed source is newsletter-first and no repository-safe public feed/archive ingestion path is currently configured.",
+      "feed_definitions": []
+    },
+    "bloomberg-cn-buzz": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "This governed source is newsletter-first and no repository-safe public feed/archive ingestion path is currently configured.",
+      "feed_definitions": []
+    },
+    "mit-technology-review": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through MIT Technology Review's public site feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.technologyreview.com/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "the-information": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "The Information is governed but no repository-safe public feed path is configured; content access is product/subscriber controlled.",
+      "feed_definitions": []
+    },
+    "rest-of-world": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Rest of World's public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "latest",
+          "label": "Latest",
+          "url": "https://restofworld.org/feed/latest/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "wired": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Wired category RSS feeds.",
+      "feed_definitions": [
+        {
+          "feed_id": "business",
+          "label": "Business",
+          "url": "https://www.wired.com/feed/category/business/latest/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "ars-technica": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Ars Technica's public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://feeds.arstechnica.com/arstechnica/index/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "techcrunch": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through TechCrunch's public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://techcrunch.com/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "stratechery": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Stratechery is governed but the current repository does not maintain a public repo-safe feed path for its subscription-heavy publishing model.",
+      "feed_definitions": []
+    },
+    "semafor-tech": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Semafor Tech is a governed newsletter source, but no repo-safe feed/archive path is configured in this project yet.",
+      "feed_definitions": []
+    },
+    "semianalysis": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Semianalysis remains governed, but a stable public feed path still needs validation.",
+      "feed_definitions": []
+    },
+    "thirtysixkr-daily": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Newsletter-form 36Kr source remains governed but not yet mapped to a repository-safe feed path.",
+      "feed_definitions": []
+    },
+    "foreign-affairs": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "Foreign Affairs is governed, but the repo does not currently maintain a public automated feed path that is safe and stable enough for this workflow.",
+      "feed_definitions": []
+    },
+    "brookings": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Brookings exposes a working WordPress feed when post type is constrained explicitly; support remains partial because broader feed paths still redirect to the homepage.",
+      "feed_definitions": [
+        {
+          "feed_id": "all",
+          "label": "All Content",
+          "url": "https://www.brookings.edu/feed/?post_type=post",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "carnegie-endowment": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Configured URL looked more like a generic RSS landing path than a confidently validated machine-readable feed endpoint, so it was downgraded pending stronger evidence.",
+      "feed_definitions": []
+    },
+    "war-on-the-rocks": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through War on the Rocks public RSS.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://warontherocks.com/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "csis": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "CSIS remains governed, but a repo-safe, stable public feed endpoint still needs validation.",
+      "feed_definitions": []
+    },
+    "harvard-business-review": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "HBR remains governed but is not yet backed by a validated public feed path in this repository.",
+      "feed_definitions": []
+    },
+    "mckinsey": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "McKinsey exposes a working public insights RSS feed, but section coverage remains narrower than the full governed source intent.",
+      "feed_definitions": [
+        {
+          "feed_id": "featured-insights",
+          "label": "Featured Insights",
+          "url": "https://www.mckinsey.com/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "carbon-brief": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Carbon Brief's public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.carbonbrief.org/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "bloomberg-green": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "Bloomberg Green stays governed, but no repository-safe public feed path is configured here.",
+      "feed_definitions": []
+    },
+    "heatmap": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Heatmap's public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://heatmap.news/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "latitude-media": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Latitude Media appears to expose a public feed, but feed behavior still needs broader live validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.latitudemedia.com/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "bloomberg-citylab": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "Bloomberg CityLab remains governed, but no repository-safe public feed path is configured in this repo.",
+      "feed_definitions": []
+    },
+    "next-city": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Next City's public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "latest",
+          "label": "Latest",
+          "url": "https://nextcity.org/feeds/latest",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "transport-politic": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through The Transport Politic public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.thetransportpolitic.com/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "caixin-global": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Configured URL looked more like a site RSS landing path than a confidently validated feed endpoint, so it was downgraded pending stronger endpoint evidence.",
+      "feed_definitions": []
+    },
+    "sixth-tone": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Sixth Tone appears to expose a public feed, but live validation and format stability need more run-time evidence.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.sixthtone.com/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "sinocism": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "Sinocism remains governed but the newsletter product is subscription-oriented and no repository-safe public automated path is configured.",
+      "feed_definitions": []
+    },
+    "pekingnology": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "newsletter_archive",
+      "adapter_type": "xml_feed",
+      "notes": "Pekingnology exposes a public newsletter feed, but support remains partial because the format is newsletter-shaped and coverage-limited.",
+      "feed_definitions": [
+        {
+          "feed_id": "newsletter",
+          "label": "Pekingnology Feed",
+          "url": "https://www.pekingnology.com/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "macro-polo": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "MacroPolo appears to expose a public site feed, but live validation is still limited.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://macropolo.org/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "monocle-weekend-edition": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Newsletter-first source with no configured repository-safe feed/archive path.",
+      "feed_definitions": []
+    },
+    "lensculture": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "LensCulture appears to expose a public feed, but coverage and format stability need more validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.lensculture.com/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "petapixel": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through PetaPixel's public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://petapixel.com/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "aeon": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Aeon's public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://aeon.co/feed.rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "essay",
+          "active_status": "active"
+        }
+      ]
+    },
+    "sociological-review": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "The Sociological Review remains governed, but no stable public feed path has been validated in this environment.",
+      "feed_definitions": []
+    },
+    "cnbc": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through CNBC's official public RSS feed for top news.",
+      "feed_definitions": [
+        {
+          "feed_id": "top-news",
+          "label": "Top News",
+          "url": "https://www.cnbc.com/id/100003114/device/rss/rss.html",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "the-guardian": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through The Guardian's official RSS feeds.",
+      "feed_definitions": [
+        {
+          "feed_id": "world",
+          "label": "World",
+          "url": "https://www.theguardian.com/world/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        },
+        {
+          "feed_id": "business",
+          "label": "Business",
+          "url": "https://www.theguardian.com/business/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "politico": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Politico exposes public RSS feeds, but coverage is narrower than the full newsroom and may skew toward US politics/news posts.",
+      "feed_definitions": [
+        {
+          "feed_id": "playbook",
+          "label": "Playbook RSS",
+          "url": "https://www.politico.com/rss/politicopicks.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "the-verge": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "The Verge exposes an official site feed, but recent subscription changes affect coverage expectations and full-text behavior.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.theverge.com/rss/index.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "platformer": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "newsletter_archive",
+      "adapter_type": "xml_feed",
+      "notes": "Platformer provides a public newsletter RSS feed, but content is newsletter-shaped and often summary-limited.",
+      "feed_definitions": [
+        {
+          "feed_id": "newsletter",
+          "label": "Platformer Feed",
+          "url": "https://www.platformer.news/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "fortune": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Fortune exposes public site feeds, but section consistency and breadth need more live validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://fortune.com/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "fast-company": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Fast Company exposes public RSS, but coverage quality and category relevance need further validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "latest",
+          "label": "Latest",
+          "url": "https://www.fastcompany.com/latest/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "404-media": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "404 Media publishes public pages but a reliable governed public feed path was not validated and parts of the product are subscriber-controlled.",
+      "feed_definitions": []
+    },
+    "ieee-spectrum": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "IEEE Spectrum exposes a public feed; this is configured as partial until feed breadth and formatting are validated across runs.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://spectrum.ieee.org/feeds/feed.rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "the-register": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through The Register's public Atom feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "headlines",
+          "label": "Headlines",
+          "url": "https://www.theregister.com/headlines.atom",
+          "format": "atom",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "toms-hardware": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Tom's Hardware public RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "all",
+          "label": "All",
+          "url": "https://www.tomshardware.com/feeds/all",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "lowpass": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "newsletter_archive",
+      "adapter_type": "xml_feed",
+      "notes": "Lowpass uses a public newsletter feed, but the source is still newsletter-shaped and should be treated as partial support.",
+      "feed_definitions": [
+        {
+          "feed_id": "newsletter",
+          "label": "Lowpass Feed",
+          "url": "https://www.lowpass.cc/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "benedict-evans": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Benedict Evans remains governed, but a stable public feed path was not validated confidently enough in this environment.",
+      "feed_definitions": []
+    },
+    "tmtpost-weekly": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "This governed source is newsletter-first and currently lacks a repository-safe feed/archive path.",
+      "feed_definitions": []
+    },
+    "foreign-policy": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "Foreign Policy remains governed, but no repository-safe public feed path is configured for automated ingestion here.",
+      "feed_definitions": []
+    },
+    "council-on-foreign-relations": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Configured URL pointed at an RSS directory page rather than a direct machine-readable feed endpoint, so it was downgraded pending a better governed endpoint.",
+      "feed_definitions": []
+    },
+    "international-crisis-group": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "International Crisis Group appears to expose a public RSS feed, but live validation is still limited.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.crisisgroup.org/rss.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "chatham-house": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Chatham House appears to expose a public feed; support remains partial until live fetch behavior is validated across runs.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.chathamhouse.org/rss.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "german-marshall-fund": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "GMF remains governed but a stable public feed path is not yet validated.",
+      "feed_definitions": []
+    },
+    "atlantic-council": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Atlantic Council appears to expose a public feed, but live validation remains incomplete.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.atlanticcouncil.org/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "stimson-center": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Stimson Center appears to expose a public feed, but support remains partial pending live validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.stimson.org/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "lowy-institute": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Lowy Institute's Interpreter feed is configured, but broader run-time validation is still needed.",
+      "feed_definitions": [
+        {
+          "feed_id": "interpreter",
+          "label": "The Interpreter",
+          "url": "https://www.lowyinstitute.org/the-interpreter/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "merics": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "MERICS appears to expose a public feed, but support remains partial pending more live validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://merics.org/en/rss.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "boston-consulting-group": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "BCG remains governed but no validated public feed path is configured yet.",
+      "feed_definitions": []
+    },
+    "bain": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Bain remains governed but no validated public feed path is configured yet.",
+      "feed_definitions": []
+    },
+    "inside-climate-news": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Inside Climate News public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://insideclimatenews.org/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "climate-home-news": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Climate Home News public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.climatechangenews.com/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "yale-climate-connections": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Yale Climate Connections public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://yaleclimateconnections.org/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "ft-moral-money": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Newsletter-first source remains governed, but no repository-safe public feed/archive path is configured.",
+      "feed_definitions": []
+    },
+    "greenbiz": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "GreenBiz now redirects to Trellis; the governed feed path uses Trellis's working public RSS endpoint while source naming remains mapped to the legacy GreenBiz identity.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://trellis.net/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "mit-climate-portal": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "MIT Climate Portal remains governed but no validated public feed path is configured yet.",
+      "feed_definitions": []
+    },
+    "project-drawdown": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Project Drawdown appears to expose a public feed, but support remains partial until broader validation is complete.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://drawdown.org/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "world-resources-institute": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "WRI insights feed is configured, but support remains partial pending broader validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "insights",
+          "label": "Insights",
+          "url": "https://www.wri.org/insights/rss.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "rocky-mountain-institute": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "RMI public feed is configured, but support remains partial pending broader live validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://rmi.org/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "canary-media": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Canary Media appears to expose a public feed, but feed stability still requires more live validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.canarymedia.com/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "e-and-e-news": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "E&E News remains governed but its product model is sufficiently access-constrained that no repo-safe public feed path is configured.",
+      "feed_definitions": []
+    },
+    "energy-monitor": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Energy Monitor public feed is configured, but support remains partial pending more live validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.energymonitor.ai/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "utility-dive": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Utility Dive public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "news",
+          "label": "News",
+          "url": "https://www.utilitydive.com/feeds/news/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "trellis": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Trellis appears to expose a public feed, but support remains partial pending more validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://trellis.net/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "transition-zero": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Transition Zero remains governed but no validated public feed path is configured yet.",
+      "feed_definitions": []
+    },
+    "the-urbanist": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through The Urbanist public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.theurbanist.org/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "urban-omnibus": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Urban Omnibus public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://urbanomnibus.net/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "curbed": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Curbed remains governed but no validated public feed path is configured yet.",
+      "feed_definitions": []
+    },
+    "city-monitor": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "City Monitor remains in the governed universe for audit visibility, but no stable current feed path is configured in the repo.",
+      "feed_definitions": []
+    },
+    "planetizen": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Planetizen public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "front-page",
+          "label": "Front Page",
+          "url": "https://www.planetizen.com/frontpage/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "urban-transport-magazine": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Urban Transport Magazine appears to expose a public feed; support remains partial pending broader validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.urban-transport-magazine.com/en/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "mass-transit": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Mass Transit public RSS is configured, but support remains partial pending broader validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.masstransitmag.com/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "infrappp-world": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "InfraPPP World remains governed but no validated public feed path is configured yet.",
+      "feed_definitions": []
+    },
+    "global-infrastructure-investor-association": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "GIIA remains governed but no validated public feed path is configured yet.",
+      "feed_definitions": []
+    },
+    "smart-cities-dive": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Smart Cities Dive public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "news",
+          "label": "News",
+          "url": "https://www.smartcitiesdive.com/feeds/news/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "works-in-progress": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "atom",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Works in Progress public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://worksinprogress.co/feed.xml",
+          "format": "atom",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "essay",
+          "active_status": "active"
+        }
+      ]
+    },
+    "smart-cities-world": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Smart Cities World public RSS is configured, but support remains partial pending broader validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.smartcitiesworld.net/rss.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "itdp-newsletter": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Newsletter-first governed source with no repository-safe feed/archive path configured yet.",
+      "feed_definitions": []
+    },
+    "china-briefing": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through China Briefing's working site-wide public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "news",
+          "label": "News",
+          "url": "https://www.china-briefing.com/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "china-media-project": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through China Media Project public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://chinamediaproject.org/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "tech-buzz-china": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Newsletter-first source with no repository-safe feed/archive path configured.",
+      "feed_definitions": []
+    },
+    "chinafile": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "ChinaFile exposes a working public RSS endpoint; support remains partial until repeated live validation confirms stability.",
+      "feed_definitions": [
+        {
+          "feed_id": "all",
+          "label": "All Content",
+          "url": "https://www.chinafile.com/rss.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "china-leadership-monitor": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "China Leadership Monitor remains governed, but no validated public feed path is configured yet.",
+      "feed_definitions": []
+    },
+    "supchina": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "SupChina remains visible in governed inventory, but no stable current feed path is configured for this repo.",
+      "feed_definitions": []
+    },
+    "dialogue-earth-china": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Dialogue Earth provides public feeds, but this source is treated as partial until English/Chinese section behavior is validated across runs.",
+      "feed_definitions": [
+        {
+          "feed_id": "en",
+          "label": "English",
+          "url": "https://dialogue.earth/en/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        },
+        {
+          "feed_id": "zh",
+          "label": "Chinese",
+          "url": "https://dialogue.earth/zh/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "the-wire-china": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "The Wire China remains governed, but no repository-safe public feed path is configured.",
+      "feed_definitions": []
+    },
+    "nikkei-asia-china": {
+      "feed_support_status": "restricted",
+      "support_level": "restricted_or_authenticated_access",
+      "ingestion_method": "licensed_feed",
+      "adapter_type": "none",
+      "notes": "Nikkei Asia China remains governed, but no repository-safe public feed path is configured.",
+      "feed_definitions": []
+    },
+    "asia-times": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Asia Times public feed is configured, but support remains partial pending more live validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://asiatimes.com/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "carbon-brief-cn": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Chinese-language Carbon Brief source remains governed, but only newsletter/manual paths are presently known in this repo.",
+      "feed_definitions": []
+    },
+    "caixin-green-esg": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Chinese-language ESG source remains governed; feed support requires more source-specific validation.",
+      "feed_definitions": []
+    },
+    "lianhe-credit-esg-news": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Chinese-language ESG source remains governed; feed support requires more source-specific validation.",
+      "feed_definitions": []
+    },
+    "china-mee-updates": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Chinese-language ministry updates remain governed; feed support requires more source-specific validation.",
+      "feed_definitions": []
+    },
+    "gef-china-sustainable-cities": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Chinese-language climate/urban source remains governed; no validated feed path is configured yet.",
+      "feed_definitions": []
+    },
+    "world-bank-china-climate": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "World Bank China climate source remains governed; no validated feed path is configured yet.",
+      "feed_definitions": []
+    },
+    "eeo": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Economic Observer remains governed; Chinese-language feed support requires more validation.",
+      "feed_definitions": []
+    },
+    "yicai": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Yicai remains governed; Chinese-language feed support requires more validation.",
+      "feed_definitions": []
+    },
+    "latepost": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "LatePost remains governed; Chinese-language feed support requires more validation.",
+      "feed_definitions": []
+    },
+    "huxiu": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Huxiu remains governed; Chinese-language feed support requires more validation.",
+      "feed_definitions": []
+    },
+    "the-paper": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "The Paper remains governed; Chinese-language feed support requires more validation.",
+      "feed_definitions": []
+    },
+    "cls": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "CLS remains governed; Chinese-language feed support requires more validation.",
+      "feed_definitions": []
+    },
+    "china-newsweek": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "China Newsweek remains governed; Chinese-language feed support requires more validation.",
+      "feed_definitions": []
+    },
+    "dao-insights": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Dao Insights remains governed; a stable public feed path needs validation.",
+      "feed_definitions": []
+    },
+    "mymypandai": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "MyMypandai remains governed; a stable public feed path needs validation.",
+      "feed_definitions": []
+    },
+    "click-interactive": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Click Interactive remains governed; a stable public feed path needs validation.",
+      "feed_definitions": []
+    },
+    "thirtysixkr-ecommerce-briefing": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Newsletter-first governed source with no repository-safe feed/archive path configured.",
+      "feed_definitions": []
+    },
+    "magnum-photos": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Magnum Photos appears to expose a public feed, but support remains partial pending further validation.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://www.magnumphotos.com/feed/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "kinfolk": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Kinfolk remains governed, but no validated public feed path is configured yet.",
+      "feed_definitions": []
+    },
+    "conde-nast-traveler": {
+      "feed_support_status": "pending_review",
+      "support_level": "needs_source_review",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Cond? Nast Traveler remains governed, but no validated public feed path is configured yet.",
+      "feed_definitions": []
+    },
+    "sprudge": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "Supported through Sprudge public feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "Home",
+          "url": "https://sprudge.com/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "feature",
+          "active_status": "active"
+        }
+      ]
+    },
+    "anthropology-environment-weekly": {
+      "feed_support_status": "unsupported",
+      "support_level": "no_repo_safe_public_feed",
+      "ingestion_method": "none",
+      "adapter_type": "none",
+      "notes": "Newsletter-first governed source with no repository-safe feed/archive path configured.",
+      "feed_definitions": []
+    },
+    "new-books-network-gender-studies": {
+      "feed_support_status": "partial",
+      "support_level": "limited_or_unvalidated_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "New Books Network category feed is configured, but support remains partial because the source is podcast/archive-shaped rather than article-native.",
+      "feed_definitions": [
+        {
+          "feed_id": "gender-studies",
+          "label": "Gender Studies",
+          "url": "https://newbooksnetwork.com/category/gender-sexuality/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "research",
+          "active_status": "active"
+        }
+      ]
+    }
+  }
+}

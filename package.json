@@ -4,9 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test  test/phase1.foundation.test.js test/phase2.semantic.test.js test/phase3.editorial.test.js test/rendering.test.js test/delivery.test.js",
+    "test": "node --test --test-isolation=none test/phase1.foundation.test.js test/phase2.semantic.test.js test/phase3.editorial.test.js test/rendering.test.js test/delivery.test.js test/live-input.test.js test/round5.briefing.test.js",
     "phase1:demo": "node src/cli/run-phase1.js --input test/fixtures/demo-raw-items.json --output artifacts/demo",
-    "dibs:run": "node src/cli/run-dibs.js"
+    "dibs:run": "node src/cli/run-dibs.js",
+    "dibs:generate-live-inputs": "node src/cli/generate-live-inputs.js",
+    "dibs:validate-live-input-config": "node src/cli/validate-live-input-config.js",
+    "dibs:summarize-live-inputs": "node src/cli/summarize-live-inputs.js",
+    "dibs:summarize-briefing-run": "node src/cli/summarize-briefing-run.js"
   },
   "dependencies": {
     "dotenv": "^17.3.1",

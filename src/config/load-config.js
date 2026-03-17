@@ -138,6 +138,23 @@ export function loadThresholds(path) {
     throw new Error(`Invalid thresholds config at ${path}: missing required top-level sections`);
   }
 
+  const context = `Invalid thresholds config at ${path}`;
+  const requiredNumericFields = [
+    'content_thresholds.substantial_snippet_chars',
+    'content_thresholds.minimum_content_signal_chars',
+    'content_thresholds.backup_pool_min_quality',
+    'content_thresholds.main_pool_min_quality',
+    'content_thresholds.summary_only_main_pool_min_quality',
+    'content_thresholds.summary_only_main_pool_min_signal_chars',
+    'content_thresholds.summary_only_main_pool_max_age_hours',
+    'content_thresholds.summary_only_main_pool_min_identity_score'
+  ];
+
+  for (const field of requiredNumericFields) {
+    const [section, key] = field.split('.');
+    assertNumber(thresholds[section]?.[key], field, context, (value) => value >= 0);
+  }
+
   return Object.freeze(thresholds);
 }
 
@@ -450,6 +467,142 @@ export function loadDeliveryRules(path) {
   assertStringArray(rules.schedule.days, 'schedule.days', context);
   assertNumber(rules.schedule.hour, 'schedule.hour', context, (value) => Number.isInteger(value) && value >= 0 && value <= 23);
   assertNumber(rules.schedule.minute, 'schedule.minute', context, (value) => Number.isInteger(value) && value >= 0 && value <= 59);
+
+  return Object.freeze(rules);
+}
+
+export function loadFeedOverrides(path) {
+  const rules = readJsonFile(path);
+  const context = `Invalid feed overrides config at ${path}`;
+  const allowedSupportStatuses = new Set(['supported', 'partial', 'unsupported', 'pending_review', 'restricted', 'unstable', 'inactive']);
+  const allowedFeedFormats = new Set(['rss', 'atom', 'html']);
+  const allowedAdapterTypes = new Set(['xml_feed', 'html_listing', 'none']);
+  const allowedContentModes = new Set(['full_text', 'summary_only', 'mixed']);
+  const allowedIngestionMethods = new Set(['rss', 'atom', 'html_listing', 'newsletter_archive', 'licensed_feed', 'none']);
+
+  if (!rules?.defaults || !rules?.sources) {
+    throw new Error(`${context}: missing required top-level sections`);
+  }
+
+  if (!rules.defaults.support_status_by_fetch_method || typeof rules.defaults.support_status_by_fetch_method !== 'object' || Array.isArray(rules.defaults.support_status_by_fetch_method)) {
+    throw new Error(`${context}: "defaults.support_status_by_fetch_method" must be an object`);
+  }
+  if (!rules.defaults.default_notes_by_status || typeof rules.defaults.default_notes_by_status !== 'object' || Array.isArray(rules.defaults.default_notes_by_status)) {
+    throw new Error(`${context}: "defaults.default_notes_by_status" must be an object`);
+  }
+  if (!rules.defaults.support_level_by_status || typeof rules.defaults.support_level_by_status !== 'object' || Array.isArray(rules.defaults.support_level_by_status)) {
+    throw new Error(`${context}: "defaults.support_level_by_status" must be an object`);
+  }
+  if (!rules.defaults.ingestion_method_defaults_by_fetch_method || typeof rules.defaults.ingestion_method_defaults_by_fetch_method !== 'object' || Array.isArray(rules.defaults.ingestion_method_defaults_by_fetch_method)) {
+    throw new Error(`${context}: "defaults.ingestion_method_defaults_by_fetch_method" must be an object`);
+  }
+  if (!rules.defaults.adapter_type_defaults_by_fetch_method || typeof rules.defaults.adapter_type_defaults_by_fetch_method !== 'object' || Array.isArray(rules.defaults.adapter_type_defaults_by_fetch_method)) {
+    throw new Error(`${context}: "defaults.adapter_type_defaults_by_fetch_method" must be an object`);
+  }
+
+  for (const [fetchMethod, status] of Object.entries(rules.defaults.support_status_by_fetch_method)) {
+    assertString(fetchMethod, `defaults.support_status_by_fetch_method.${fetchMethod}`, context);
+    assertEnum(status, allowedSupportStatuses, `defaults.support_status_by_fetch_method.${fetchMethod}`, context);
+  }
+
+  for (const [status, note] of Object.entries(rules.defaults.default_notes_by_status)) {
+    assertEnum(status, allowedSupportStatuses, `defaults.default_notes_by_status.${status}`, context);
+    assertString(note, `defaults.default_notes_by_status.${status}`, context);
+  }
+  for (const [status, supportLevel] of Object.entries(rules.defaults.support_level_by_status)) {
+    assertEnum(status, allowedSupportStatuses, `defaults.support_level_by_status.${status}`, context);
+    assertString(supportLevel, `defaults.support_level_by_status.${status}`, context);
+  }
+  for (const [fetchMethod, ingestionMethod] of Object.entries(rules.defaults.ingestion_method_defaults_by_fetch_method)) {
+    assertString(fetchMethod, `defaults.ingestion_method_defaults_by_fetch_method.${fetchMethod}`, context);
+    assertEnum(ingestionMethod, allowedIngestionMethods, `defaults.ingestion_method_defaults_by_fetch_method.${fetchMethod}`, context);
+  }
+  for (const [fetchMethod, adapterType] of Object.entries(rules.defaults.adapter_type_defaults_by_fetch_method)) {
+    assertString(fetchMethod, `defaults.adapter_type_defaults_by_fetch_method.${fetchMethod}`, context);
+    assertEnum(adapterType, allowedAdapterTypes, `defaults.adapter_type_defaults_by_fetch_method.${fetchMethod}`, context);
+  }
+
+  if (typeof rules.sources !== 'object' || Array.isArray(rules.sources)) {
+    throw new Error(`${context}: "sources" must be an object keyed by source_id`);
+  }
+
+  for (const [sourceId, override] of Object.entries(rules.sources)) {
+    const sourceContext = `${context}: source "${sourceId}"`;
+    if (!override || typeof override !== 'object' || Array.isArray(override)) {
+      throw new Error(`${sourceContext} override must be an object`);
+    }
+
+    if ('feed_support_status' in override) {
+      assertEnum(override.feed_support_status, allowedSupportStatuses, 'feed_support_status', sourceContext);
+    }
+    if ('support_level' in override) {
+      assertString(override.support_level, 'support_level', sourceContext);
+    }
+    if ('ingestion_method' in override) {
+      assertEnum(override.ingestion_method, allowedIngestionMethods, 'ingestion_method', sourceContext);
+    }
+    if ('adapter_type' in override) {
+      assertEnum(override.adapter_type, allowedAdapterTypes, 'adapter_type', sourceContext);
+    }
+    if ('notes' in override) {
+      assertString(override.notes, 'notes', sourceContext);
+    }
+    if ('feed_notes' in override) {
+      assertString(override.feed_notes, 'feed_notes', sourceContext);
+    }
+
+    const feedDefinitions = override.feed_definitions ?? override.feeds;
+    if (feedDefinitions !== undefined) {
+      if (!Array.isArray(feedDefinitions)) {
+        throw new Error(`${sourceContext}: "feed_definitions" must be an array`);
+      }
+
+      for (const [index, feed] of feedDefinitions.entries()) {
+        const feedContext = `${sourceContext} feed index ${index}`;
+        if (!feed || typeof feed !== 'object' || Array.isArray(feed)) {
+          throw new Error(`${feedContext}: feed must be an object`);
+        }
+
+        for (const field of ['feed_id', 'label', 'expected_entry_type', 'active_status']) {
+          assertString(feed[field], field, feedContext);
+        }
+
+        const url = feed.url ?? feed.feed_url;
+        const format = feed.format ?? feed.feed_format;
+        const adapterType = feed.adapter_type ?? 'xml_feed';
+        const contentMode = feed.content_mode ?? 'summary_only';
+
+        assertString(url, 'url', feedContext);
+        assertEnum(format, allowedFeedFormats, 'format', feedContext);
+        assertEnum(adapterType, allowedAdapterTypes, 'adapter_type', feedContext);
+        assertEnum(contentMode, allowedContentModes, 'content_mode', feedContext);
+        try {
+          new URL(url);
+        } catch {
+          throw new Error(`${feedContext}: "url" must be a valid absolute URL`);
+        }
+      }
+    }
+  }
+
+  return Object.freeze(rules);
+}
+
+export function loadLiveInputRules(path) {
+  const rules = readJsonFile(path);
+  const context = `Invalid live-input rules config at ${path}`;
+
+  if (!rules?.fetch || !Array.isArray(rules.success_ladder_source_ids)) {
+    throw new Error(`${context}: missing required top-level sections`);
+  }
+
+  assertNumber(rules.fetch.timeout_ms, 'fetch.timeout_ms', context, (value) => Number.isInteger(value) && value > 0);
+  assertNumber(rules.fetch.max_response_bytes, 'fetch.max_response_bytes', context, (value) => Number.isInteger(value) && value >= 65536);
+  assertNumber(rules.fetch.max_attempts, 'fetch.max_attempts', context, (value) => Number.isInteger(value) && value >= 1 && value <= 5);
+  assertNumber(rules.fetch.retry_backoff_ms, 'fetch.retry_backoff_ms', context, (value) => Number.isInteger(value) && value >= 0 && value <= 60000);
+  assertString(rules.fetch.accept_language, 'fetch.accept_language', context);
+  assertString(rules.fetch.user_agent, 'fetch.user_agent', context);
+  assertStringArray(rules.success_ladder_source_ids, 'success_ladder_source_ids', context);
 
   return Object.freeze(rules);
 }

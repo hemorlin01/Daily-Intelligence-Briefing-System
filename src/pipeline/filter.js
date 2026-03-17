@@ -44,6 +44,29 @@ function hasEnoughContentSignal(record, rules) {
     || summaryLength >= rules.content_thresholds.substantial_snippet_chars;
 }
 
+function getContentLengths(record) {
+  return {
+    canonicalLength: record.canonical_text?.length ?? 0,
+    snippetLength: record.raw_snippet?.length ?? 0,
+    summaryLength: record.source_provided_summary?.length ?? 0
+  };
+}
+
+function isFeedSummaryMainEligible(record, rules, ageHours) {
+  const { canonicalLength, snippetLength, summaryLength } = getContentLengths(record);
+  const strongestSignal = Math.max(snippetLength, summaryLength);
+  const ingestionMethod = String(record.ingestion_method ?? '').toLowerCase();
+  const isGovernedFeedIngestion = ['rss', 'atom', 'html_listing'].includes(ingestionMethod);
+
+  return canonicalLength === 0
+    && isGovernedFeedIngestion
+    && ageHours !== null
+    && ageHours <= rules.content_thresholds.summary_only_main_pool_max_age_hours
+    && strongestSignal >= rules.content_thresholds.summary_only_main_pool_min_signal_chars
+    && record.extraction_quality_score >= rules.content_thresholds.summary_only_main_pool_min_quality
+    && (record.publication_identity_score ?? 0) >= rules.content_thresholds.summary_only_main_pool_min_identity_score;
+}
+
 function isLongFormEligible(record, source, rules, ageHours) {
   const sourceWindow = source.allowed_long_form_window_hours ?? rules.candidate_windows.long_form_max_hours;
   const longFormTypes = new Set(['analysis', 'essay', 'feature', 'research']);
@@ -101,12 +124,25 @@ export function classifyCandidate({ record, source, rules, now }) {
     };
   }
 
-  const canonicalLength = record.canonical_text?.length ?? 0;
-  const snippetLength = record.raw_snippet?.length ?? 0;
-  const summaryLength = record.source_provided_summary?.length ?? 0;
+  const { canonicalLength, snippetLength, summaryLength } = getContentLengths(record);
+  const feedSummaryMainEligible = isFeedSummaryMainEligible(record, rules, ageHours);
   const weakButUsable = record.extraction_quality_score < rules.content_thresholds.main_pool_min_quality
     || record.content_completeness === 'weak'
-    || (canonicalLength === 0 && (snippetLength >= rules.content_thresholds.substantial_snippet_chars || summaryLength >= rules.content_thresholds.substantial_snippet_chars));
+    || (
+      canonicalLength === 0
+      && (snippetLength >= rules.content_thresholds.substantial_snippet_chars || summaryLength >= rules.content_thresholds.substantial_snippet_chars)
+      && !feedSummaryMainEligible
+    );
+
+  if (feedSummaryMainEligible) {
+    return {
+      disposition: 'main',
+      reasons: [],
+      warnings: [...warnings, 'summary_only_main_candidate'],
+      age_hours: ageHours,
+      malformed: false
+    };
+  }
 
   if (weakButUsable) {
     return {

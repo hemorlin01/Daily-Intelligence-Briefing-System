@@ -21,6 +21,12 @@ function formatKeywords(keywords) {
   return keywords.join(', ');
 }
 
+function shouldRenderByline(item) {
+  return typeof item.author_byline === 'string'
+    && item.author_byline.trim().length > 0
+    && item.author_byline.trim().toLowerCase() !== item.source_display_name.trim().toLowerCase();
+}
+
 function truncateText(text, maxChars) {
   const normalized = normalizeWhitespace(text);
   if (normalized.length <= maxChars) {
@@ -81,6 +87,9 @@ function renderEmail(selectionResult, blocks, rules, runTimestamp) {
       entryArticleIds.push(item.article_id);
       lines.push(`- ${item.title}`);
       lines.push(`  Source: ${item.source_display_name}`);
+      if (shouldRenderByline(item)) {
+        lines.push(`  Byline: ${item.author_byline}`);
+      }
       lines.push(`  URL: ${item.url}`);
       if (rules.email.show_keywords) {
         lines.push(`  Keywords: ${formatKeywords(item.candidate_keywords)}`);
@@ -122,6 +131,9 @@ function renderMarkdown(selectionResult, blocks, rules, runTimestamp) {
       lines.push('');
       lines.push(`- Article ID: ${item.article_id}`);
       lines.push(`- Source: ${item.source_display_name}`);
+      if (shouldRenderByline(item)) {
+        lines.push(`- Byline: ${item.author_byline}`);
+      }
       lines.push(`- URL: ${item.url}`);
       lines.push(`- Primary domain: ${item.primary_domain}`);
       lines.push(`- Keywords: ${formatKeywords(item.candidate_keywords)}`);
@@ -175,6 +187,9 @@ function renderTelegramForStage(selectionResult, blocks, rules, runTimestamp, st
       }
 
       lines.push(`${item.title} — ${item.source_display_name}`);
+      if (shouldRenderByline(item)) {
+        lines.push(`Byline: ${item.author_byline}`);
+      }
       lines.push(`Summary: ${summary.text}`);
       lines.push(`Why: ${why.text}`);
       lines.push(item.url);

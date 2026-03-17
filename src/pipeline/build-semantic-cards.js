@@ -551,6 +551,7 @@ function extractSemanticCard(record, taxonomy, rules) {
       source_priority_tier: record.source_priority_tier ?? 3,
       source_class: record.source_class ?? 'unknown',
       article_type: record.article_type ?? null,
+      canonical_author: record.author ?? null,
       candidate_disposition: record.candidate_disposition ?? 'main',
       canonical_fetched_at: record.fetched_at ?? null,
       source_display_name: record.source_display_name ?? record.source_id,

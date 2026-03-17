@@ -8,7 +8,11 @@
     "substantial_snippet_chars": 140,
     "minimum_content_signal_chars": 60,
     "backup_pool_min_quality": 0.35,
-    "main_pool_min_quality": 0.6
+    "main_pool_min_quality": 0.6,
+    "summary_only_main_pool_min_quality": 0.52,
+    "summary_only_main_pool_min_signal_chars": 160,
+    "summary_only_main_pool_max_age_hours": 48,
+    "summary_only_main_pool_min_identity_score": 0.75
   },
   "quality_scoring": {
     "canonical_text_good_chars": 1200,

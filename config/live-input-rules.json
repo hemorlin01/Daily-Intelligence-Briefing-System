@@ -1,0 +1,21 @@
+{
+  "fetch": {
+    "timeout_ms": 20000,
+    "max_response_bytes": 2000000,
+    "max_attempts": 2,
+    "retry_backoff_ms": 1200,
+    "accept_language": "en-US,en;q=0.8,zh-CN,zh;q=0.6",
+    "user_agent": "DIBS/1.0 (+https://github.com/) governed-live-input-fetcher"
+  },
+  "success_ladder_source_ids": [
+    "bbc-news",
+    "channel-newsasia",
+    "straits-times",
+    "techcrunch",
+    "ars-technica",
+    "wired",
+    "mit-technology-review",
+    "rest-of-world",
+    "carbon-brief"
+  ]
+}

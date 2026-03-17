@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { loadDeliveryRules } from '../config/load-config.js';
+import { loadDeliveryRules, loadEditorialRules, loadSourceCatalog } from '../config/load-config.js';
 import { EmailDeliveryAdapter } from '../delivery/email-adapter.js';
 import { TelegramDeliveryAdapter } from '../delivery/telegram-adapter.js';
 import { getChannelLedgerEntry, loadDeliveryLedger, recordChannelAttempt, saveDeliveryLedger } from '../delivery/state-store.js';
@@ -13,6 +13,8 @@ import { renderBriefing } from './render-briefing.js';
 import { evaluateSchedule, writeSchedulerDebug } from '../scheduler/schedule.js';
 
 const DEFAULT_DELIVERY_RULES_PATH = resolve(process.cwd(), 'config', 'delivery-rules.json');
+const DEFAULT_EDITORIAL_RULES_PATH = resolve(process.cwd(), 'config', 'editorial-rules.json');
+const DEFAULT_SOURCES_PATH = resolve(process.cwd(), 'config', 'sources.json');
 
 function hashContent(value) {
   return createHash('sha256').update(value).digest('hex');
@@ -26,6 +28,17 @@ function writeJson(path, value) {
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, JSON.stringify(value, null, 2));
   return path;
+}
+
+function incrementCounter(target, key) {
+  target[key] = (target[key] ?? 0) + 1;
+}
+
+function topEntries(map, limit = 5) {
+  return Object.entries(map)
+    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+    .slice(0, limit)
+    .map(([key, count]) => ({ key, count }));
 }
 
 function resolveChannelDestination(channelConfig, environment) {
@@ -43,6 +56,10 @@ function buildRunBundle({
 }) {
   const diagnosticsReferences = {
     candidate_pool_report: resolve(outputDir, 'candidate_pool_report.json'),
+    briefing_candidate_funnel: resolve(outputDir, 'briefing_candidate_funnel.json'),
+    briefing_selection_report: resolve(outputDir, 'briefing_selection_report.json'),
+    briefing_status_report: resolve(outputDir, 'briefing_status_report.json'),
+    attribution_audit_report: resolve(outputDir, 'attribution_audit_report.json'),
     semantic_diagnostics: resolve(outputDir, 'semantic_diagnostics.json'),
     editorial_selection_debug: resolve(outputDir, 'editorial_selection_debug.json'),
     rendering_debug: resolve(outputDir, 'rendering_debug.json'),
@@ -303,6 +320,139 @@ function writeRunArtifacts(outputDir, bundle, deliveryStatus, runLog) {
   writeJson(resolve(outputDir, 'run_log.json'), runLog);
 }
 
+function deriveDegradedReasons({ candidate, semantic, editorial, editorialRules }) {
+  const reasons = [];
+
+  if (candidate.mainPool.length === 0) {
+    reasons.push('main_candidate_pool_empty');
+  }
+  if (semantic.cards.length === 0) {
+    reasons.push('semantic_pool_empty');
+  }
+  if (editorial.result.selected_count < editorialRules.selection.minimum_target_count) {
+    reasons.push('selected_below_minimum_target');
+  }
+  if ((candidate.candidatePoolReport.rejection_reasons_breakdown.stale_item ?? 0) > 0) {
+    reasons.push('stale_items_reduced_candidate_pool');
+  }
+  if ((candidate.candidatePoolReport.rejection_reasons_breakdown.insufficient_content_signal ?? 0) > 0) {
+    reasons.push('insufficient_content_signal_reduced_candidate_pool');
+  }
+
+  return [...new Set(reasons)];
+}
+
+function buildBriefingCandidateFunnel({ candidate, semantic, editorial, rendered, editorialRules, runTimestamp }) {
+  const scoredAboveThreshold = editorial.scoredCandidates.filter(
+    (entry) => entry.final_composite_score >= editorialRules.selection.minimum_candidate_score
+  );
+  const sectionAllocationCandidates = scoredAboveThreshold.filter((entry) => entry.is_cluster_representative);
+  const degradedReasons = deriveDegradedReasons({ candidate, semantic, editorial, editorialRules });
+
+  return {
+    run_timestamp: runTimestamp,
+    raw_items_in: candidate.candidatePoolReport.total_raw_items_fetched,
+    normalized_items: candidate.candidatePoolReport.total_normalized_items,
+    rejected_items: candidate.candidatePoolReport.rejected_item_count,
+    rejection_reasons_breakdown: candidate.candidatePoolReport.rejection_reasons_breakdown,
+    backup_pool_items: candidate.backupPool.length,
+    post_filter_items: candidate.mainPool.length,
+    semantic_cards: semantic.cards.length,
+    semantic_failures: semantic.failures.length,
+    clusters: editorial.clusters.length,
+    post_ranking_items: editorial.scoredCandidates.length,
+    above_threshold_items: scoredAboveThreshold.length,
+    section_allocation_candidates: sectionAllocationCandidates.length,
+    final_selected_items: editorial.result.selected_count,
+    final_sections: rendered.blocks.length,
+    run_status: editorial.result.run_status,
+    degraded_mode: editorial.result.degraded_mode,
+    under_default_target: editorial.result.under_default_target,
+    degraded_reasons: degradedReasons
+  };
+}
+
+function buildBriefingSelectionReport({ editorial, rendered, runTimestamp }) {
+  const sourceDistribution = {};
+  for (const item of editorial.result.selected_items) {
+    incrementCounter(sourceDistribution, item.source_display_name);
+  }
+
+  return {
+    run_timestamp: runTimestamp,
+    run_status: editorial.result.run_status,
+    selected_count: editorial.result.selected_count,
+    selected_article_ids: editorial.result.selected_article_ids,
+    selected_sections: rendered.blocks.map((block) => ({
+      block_id: block.block_id,
+      label: block.label,
+      item_count: block.items.length,
+      article_ids: block.entry_article_ids
+    })),
+    selected_domain_counts: editorial.diagnostics.per_domain_counts,
+    selected_source_counts: sourceDistribution,
+    selected_source_class_counts: editorial.diagnostics.per_source_class_counts,
+    top_selected_governed_sources: topEntries(sourceDistribution),
+    selected_items: editorial.result.selected_items.map((item) => ({
+      article_id: item.article_id,
+      source_id: item.source_id,
+      source_display_name: item.source_display_name,
+      author_byline: item.author_byline ?? null,
+      primary_domain: item.primary_domain,
+      final_composite_score: item.final_composite_score,
+      selection_reason_codes: item.selection_reason_codes
+    }))
+  };
+}
+
+function buildBriefingStatusReport({ candidate, semantic, editorial, rendered, editorialRules, runTimestamp }) {
+  const degradedReasons = editorial.result.run_status === 'degraded'
+    ? deriveDegradedReasons({ candidate, semantic, editorial, editorialRules })
+    : [];
+
+  return {
+    run_timestamp: runTimestamp,
+    pipeline_status: 'completed',
+    run_status: editorial.result.run_status,
+    degraded_mode: editorial.result.degraded_mode,
+    under_default_target: editorial.result.under_default_target,
+    selected_count: editorial.result.selected_count,
+    minimum_target_count: editorialRules.selection.minimum_target_count,
+    default_target_count: editorialRules.selection.default_target_count,
+    degraded_reasons: degradedReasons,
+    warning_flags: [
+      ...candidate.candidatePoolReport.warnings,
+      ...rendered.diagnostics.rendering_warnings
+    ]
+  };
+}
+
+function buildAttributionAuditReport({ editorial, sourceCatalog, runTimestamp }) {
+  return {
+    run_timestamp: runTimestamp,
+    audited_items: editorial.result.selected_items.map((item) => {
+      const governedSourceDisplayName = sourceCatalog.sources.get(item.source_id)?.display_name ?? item.source_display_name;
+      const byline = item.author_byline ?? null;
+      return {
+        article_id: item.article_id,
+        source_id: item.source_id,
+        governed_source_display_name: governedSourceDisplayName,
+        rendered_source_display_name: item.source_display_name,
+        author_byline: byline,
+        source_display_matches_governed_identity: item.source_display_name === governedSourceDisplayName,
+        byline_rendered_separately: Boolean(byline && byline.trim() && byline.trim().toLowerCase() !== item.source_display_name.trim().toLowerCase())
+      };
+    })
+  };
+}
+
+function writeBriefingDiagnostics(outputDir, reports) {
+  writeJson(resolve(outputDir, 'briefing_candidate_funnel.json'), reports.candidateFunnel);
+  writeJson(resolve(outputDir, 'briefing_selection_report.json'), reports.selectionReport);
+  writeJson(resolve(outputDir, 'briefing_status_report.json'), reports.statusReport);
+  writeJson(resolve(outputDir, 'attribution_audit_report.json'), reports.attributionAudit);
+}
+
 export async function deliverRunBundle({
   bundle,
   dryRun = false,
@@ -356,6 +506,8 @@ export async function executeDibsRun({
   now = new Date(),
   runTimestamp = now.toISOString(),
   deliveryRulesPath = DEFAULT_DELIVERY_RULES_PATH,
+  editorialRulesPath = DEFAULT_EDITORIAL_RULES_PATH,
+  sourcesPath = DEFAULT_SOURCES_PATH,
   renderingRulesPath = resolve(process.cwd(), 'config', 'rendering-rules.json'),
   dryRun = false,
   replay = false,
@@ -364,6 +516,8 @@ export async function executeDibsRun({
   environment = process.env
 }) {
   const deliveryRules = loadDeliveryRules(deliveryRulesPath);
+  const editorialRules = loadEditorialRules(editorialRulesPath);
+  const sourceCatalog = loadSourceCatalog(sourcesPath);
   const runId = makeRunId(runTimestamp);
   const outputDir = resolve(process.cwd(), deliveryRules.artifacts.output_root, runId);
   mkdirSync(outputDir, { recursive: true });
@@ -395,7 +549,9 @@ export async function executeDibsRun({
     const editorial = buildEditorialSelection({
       semanticCards: semantic.cards,
       outputDir,
-      runTimestamp
+      runTimestamp,
+      editorialRulesPath,
+      sourcesPath
     });
     markPhase(runLog, 'editorial', 'succeeded', {
       selected_count: editorial.result.selected_count
@@ -411,6 +567,35 @@ export async function executeDibsRun({
     markPhase(runLog, 'rendering', 'succeeded', {
       email_entries: rendered.email.entry_article_ids.length,
       telegram_entries: rendered.telegram.entry_article_ids.length
+    });
+
+    writeBriefingDiagnostics(outputDir, {
+      candidateFunnel: buildBriefingCandidateFunnel({
+        candidate,
+        semantic,
+        editorial,
+        rendered,
+        editorialRules,
+        runTimestamp
+      }),
+      selectionReport: buildBriefingSelectionReport({
+        editorial,
+        rendered,
+        runTimestamp
+      }),
+      statusReport: buildBriefingStatusReport({
+        candidate,
+        semantic,
+        editorial,
+        rendered,
+        editorialRules,
+        runTimestamp
+      }),
+      attributionAudit: buildAttributionAuditReport({
+        editorial,
+        sourceCatalog,
+        runTimestamp
+      })
     });
 
     const bundle = buildRunBundle({

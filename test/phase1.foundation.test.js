@@ -112,7 +112,7 @@ test('deduplicates syndicated wire duplicates', () => {
   assert.equal(result.mainPool[0].source_id, 'reuters');
 });
 
-test('keeps items with missing canonical text when snippet is substantial', () => {
+test('promotes strong summary-only feed items into the main pool when metadata is strong', () => {
   const result = buildCandidatePools({
     rawItems: [
       makeRawEntry('techcrunch', {
@@ -125,9 +125,10 @@ test('keeps items with missing canonical text when snippet is substantial', () =
     now: FIXED_NOW
   });
 
-  assert.equal(result.mainPool.length, 0);
-  assert.equal(result.backupPool.length, 1);
+  assert.equal(result.mainPool.length, 1);
+  assert.equal(result.backupPool.length, 0);
   assert.equal(result.rejected.length, 0);
+  assert.equal(result.mainPool[0].candidate_warnings.includes('summary_only_main_candidate'), true);
 });
 
 test('rejects invalid URLs', () => {
@@ -274,8 +275,8 @@ test('writes candidate diagnostics files', () => {
     const deduplicationPath = join(directory, 'deduplication_report.json');
     const ingestionPath = join(directory, 'ingestion_debug.json');
 
-    assert.equal(result.mainPool.length, 1);
-    assert.equal(result.backupPool.length, 1);
+    assert.equal(result.mainPool.length, 2);
+    assert.equal(result.backupPool.length, 0);
     assert.equal(result.rejected.length, 1);
     assert.equal(existsSync(candidateReportPath), true);
     assert.equal(existsSync(deduplicationPath), true);
@@ -295,15 +296,15 @@ test('writes candidate diagnostics files', () => {
       culture_design_lifestyle: 7,
       academic_intellectual: 4
     });
-    assert.equal(report.main_candidate_pool_size, 1);
-    assert.equal(report.backup_pool_size, 1);
+    assert.equal(report.main_candidate_pool_size, 2);
+    assert.equal(report.backup_pool_size, 0);
     assert.equal(report.rejected_item_count, 1);
     assert.equal(report.total_raw_items_fetched, 3);
     assert.equal(report.per_source_counts.reuters.main, 1);
-    assert.equal(report.per_source_counts.techcrunch.backup, 1);
+    assert.equal(report.per_source_counts.techcrunch.main, 1);
     assert.equal(report.per_source_counts['foreign-policy'].normalized, 0);
     assert.equal(report.per_source_class_counts.global_hard_news.configured_sources, 16);
     assert.equal(report.per_source_class_counts.global_hard_news.normalized_items, 2);
-    assert.equal(report.per_source_class_counts.technology_digital_economy.backup_candidates, 1);
+    assert.equal(report.per_source_class_counts.technology_digital_economy.main_candidates, 1);
   });
 });

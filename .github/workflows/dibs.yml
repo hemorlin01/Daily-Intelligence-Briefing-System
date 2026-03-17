@@ -45,10 +45,43 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Run DIBS
-        run: npm run dibs:run -- --input test/fixtures/demo-raw-items.json --channels email,telegram
+      - name: Validate live-input config
+        run: npm run dibs:validate-live-input-config
+
+      - name: Generate live raw items
+        run: npm run dibs:generate-live-inputs
+
+      - name: Print live-input summary and source table
+        if: always()
+        run: |
+          if [ -f artifacts/inputs/live_input_operational_summary.json ]; then
+            npm run dibs:summarize-live-inputs
+          else
+            echo "No live-input summary available."
+          fi
+
+      - name: Run briefing pipeline
+        run: npm run dibs:run -- --input artifacts/inputs/raw-items.json --channels email,telegram
+
+      - name: Print briefing outcome summary
+        if: always()
+        run: |
+          if find artifacts/runs -name briefing_candidate_funnel.json -print -quit | grep -q .; then
+            npm run dibs:summarize-briefing-run
+          else
+            echo "No briefing summary available."
+          fi
+
+      - name: Upload input artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dibs-input-artifacts
+          path: artifacts/inputs
+          if-no-files-found: warn
 
       - name: Upload run artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dibs-run-artifacts
