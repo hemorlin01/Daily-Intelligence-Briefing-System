@@ -154,7 +154,13 @@ test('why_it_matters follows source language for English and Chinese items', () 
 test('summary length policy distinguishes full-text and summary-only items', () => {
   const fullTextRecord = makeCanonicalMainRecord({
     article_id: 'full-text-1',
-    canonical_text: 'Regulators outlined a detailed export plan that affects advanced chips, tooling, and supplier exposure across multiple regions. '.repeat(18),
+    canonical_text: [
+  'Regulators outlined a detailed export plan that affects advanced chips, manufacturing tools, and supplier exposure across several major markets.',
+  'Officials said the package is designed to tighten enforcement around sensitive compute infrastructure, intermediary resellers, and cross-border compliance reporting.',
+  'Suppliers are reviewing contract language, inventory buffers, and customer-screening processes as the rules move toward implementation.',
+  'Industry executives said the proposal may alter capital spending timing, logistics routing, and near-term procurement decisions for firms with global manufacturing footprints.',
+  'Analysts expect the measures to influence investment planning, supply-chain diversification, and the commercial outlook for advanced hardware providers.'
+].join(' '),
     raw_snippet: 'Regulators outlined a detailed export plan affecting advanced chips and tooling.'
   });
   const summaryOnlyRecord = makeCanonicalMainRecord({
