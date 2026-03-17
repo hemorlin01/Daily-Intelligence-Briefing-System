@@ -13,6 +13,36 @@ const SUMMARY_RESIDUE_PATTERNS_EN = [
   /\boriginally appeared on\b/i,
   /\boriginally published at\b/i,
   /\bthis article was originally published\b/i,
+  /\bprimary image\b/i,
+  /\bfeatured image\b/i,
+  /\bimage credit\b/i,
+  /\bphoto credit\b/i,
+  /\bposted in\b/i,
+  /\bfiled under\b/i,
+  /\bcategory:\b/i,
+  /\btags?:\b/i
+];
+const SUMMARY_RESIDUE_PATTERNS_ZH = [
+  /\u539f\u6587\u94fe\u63a5/,
+  /\u9605\u8bfb\u539f\u6587/,
+  /\u66f4\u591a\u5185\u5bb9/,
+  /\u6765\u6e90[:\uFF1A]/,
+  /\u8f6c\u8f7d/
+];
+const GENERIC_WHY_PHRASES_EN = [
+  /provides a frame/i,
+  /clarifies the assumptions/i,
+  /sets expectations/i,
+  /decision frame/i,
+  /decision assumptions/i
+];
+const SUMMARY_RESIDUE_PATTERNS_EN = [
+  /the post\b.*\bappeared first on/i,
+  /\bappeared first on\b/i,
+  /\bwas originally published on\b/i,
+  /\boriginally appeared on\b/i,
+  /\boriginally published at\b/i,
+  /\bthis article was originally published\b/i,
   /\bcontinue reading\b/i,
   /\bread more\b/i,
   /\bclick here\b/i,
@@ -45,6 +75,13 @@ const SOFT_CONTENT_TITLE_PATTERNS = [
   /\bguide\b/i,
   /\bbest\b/i,
   /\btop\s+\d+\b/i
+];
+const GENERIC_WHY_PHRASES_EN = [
+  /provides a frame/i,
+  /clarifies the assumptions/i,
+  /sets expectations/i,
+  /decision frame/i,
+  /decision assumptions/i
 ];
 
 function addWarning(target, code, message, severity = 'warning') {
@@ -91,6 +128,56 @@ function countWords(text) {
 
 function countChineseChars(text) {
   return (normalizeWhitespace(text).match(/[\u3400-\u9fff]/gu) ?? []).length;
+}
+
+function stripTrailingEllipsis(text) {
+  return normalizeWhitespace(text).replace(/(\.\.\.|…)+$/u, '').trim();
+}
+
+function isSummaryComplete(text, language) {
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    return false;
+  }
+  if (language === 'zh') {
+    return /[銆傦紒锛焆$/.test(normalized) && countChineseChars(normalized) >= 24;
+  }
+  return /[.!?]$/.test(normalized) && countWords(normalized) >= 12;
+}
+
+function stripResidueFromSentence(sentence, language) {
+  const patterns = language === 'zh' ? SUMMARY_RESIDUE_PATTERNS_ZH : SUMMARY_RESIDUE_PATTERNS_EN;
+  let trimmed = sentence;
+  for (const pattern of patterns) {
+    const index = trimmed.search(pattern);
+    if (index >= 0) {
+      trimmed = trimmed.slice(0, index).trim();
+    }
+  }
+  return trimmed;
+}
+
+function cleanSummaryResidue(summary, language) {
+  const normalized = normalizeWhitespace(summary);
+  if (!normalized) {
+    return normalized;
+  }
+
+  const sentences = splitSentencesNormalized(normalized, language);
+  if (sentences.length === 0) {
+    return ensureTerminalPunctuation(stripTrailingEllipsis(normalized), language);
+  }
+
+  const cleanedSentences = sentences
+    .map((sentence) => stripResidueFromSentence(sentence, language))
+    .filter(Boolean);
+
+  if (cleanedSentences.length === 0) {
+    return ensureTerminalPunctuation(stripTrailingEllipsis(normalized), language);
+  }
+
+  const joined = language === 'zh' ? cleanedSentences.join('') : cleanedSentences.join(' ');
+  return ensureTerminalPunctuation(stripTrailingEllipsis(joined), language);
 }
 
 function ensureTerminalPunctuation(text, language) {
@@ -202,13 +289,39 @@ function cleanSummaryResidue(summary, language) {
     return ensureTerminalPunctuation(stripTrailingEllipsis(normalized), language);
   }
 
-  const retained = sentences.filter((sentence) => !patterns.some((pattern) => pattern.test(sentence)));
+  const retained = sentences
+    .map((sentence) => stripResidueFromSentence(sentence, language))
+    .filter(Boolean)
+    .filter((sentence) => (language === 'zh' ? countChineseChars(sentence) >= 12 : countWords(sentence) >= 6));
   if (retained.length === 0) {
     return ensureTerminalPunctuation(stripTrailingEllipsis(normalized), language);
   }
 
   const joined = language === 'zh' ? retained.join('') : retained.join(' ');
   return ensureTerminalPunctuation(stripTrailingEllipsis(joined), language);
+}
+
+function isSummaryComplete(text, language) {
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    return false;
+  }
+  if (language === 'zh') {
+    return /[銆傦紒锛焆$/.test(normalized) && countChineseChars(normalized) >= 24;
+  }
+  return /[.!?]$/.test(normalized) && countWords(normalized) >= 12;
+}
+
+function stripResidueFromSentence(sentence, language) {
+  const patterns = language === 'zh' ? SUMMARY_RESIDUE_PATTERNS_ZH : SUMMARY_RESIDUE_PATTERNS_EN;
+  let trimmed = sentence;
+  for (const pattern of patterns) {
+    const index = trimmed.search(pattern);
+    if (index >= 0) {
+      trimmed = trimmed.slice(0, index).trim();
+    }
+  }
+  return trimmed;
 }
 
 function splitSentences(text, language) {
@@ -290,7 +403,35 @@ function summarizeFactually(record, rules, warnings) {
       minWords: hasFullText ? rules.summary_rules.english_min_words : rules.summary_rules.english_summary_only_min_words,
       maxWords: hasFullText ? rules.summary_rules.english_max_words : rules.summary_rules.english_summary_only_max_words
     });
-  const cleanedSummary = cleanSummaryResidue(summary, language);
+  let cleanedSummary = cleanSummaryResidue(summary, language);
+
+  if (!isSummaryComplete(cleanedSummary, language)) {
+    const fallbackSentences = sentences
+      .map((sentence) => stripResidueFromSentence(sentence, language))
+      .filter(Boolean);
+
+    if (fallbackSentences.length > 0) {
+      const fallbackSummary = language === 'zh'
+        ? buildSummaryFromSentences({
+          sentences: fallbackSentences,
+          language,
+          minChars: hasFullText ? rules.summary_rules.non_english_min_chars : rules.summary_rules.non_english_summary_only_min_chars,
+          maxChars: hasFullText ? rules.summary_rules.non_english_max_chars : rules.summary_rules.non_english_summary_only_max_chars
+        })
+        : buildSummaryFromSentences({
+          sentences: fallbackSentences,
+          language,
+          minWords: hasFullText ? rules.summary_rules.english_min_words : rules.summary_rules.english_summary_only_min_words,
+          maxWords: hasFullText ? rules.summary_rules.english_max_words : rules.summary_rules.english_summary_only_max_words
+        });
+
+      cleanedSummary = cleanSummaryResidue(fallbackSummary, language);
+    }
+  }
+
+  if (!isSummaryComplete(cleanedSummary, language) && record.title) {
+    cleanedSummary = ensureTerminalPunctuation(stripTrailingEllipsis(record.title), language);
+  }
 
   if (!hasFullText && !hasSnippet && !hasSummary) {
     addWarning(warnings, 'summary_limited_context', 'Summary is constrained by limited feed text.', 'info');
@@ -803,6 +944,28 @@ function buildWhyItMattersZh({ subject, impactPhrase, eventType, topicLabels, st
   return ensureTerminalPunctuation(sentence, 'zh');
 }
 
+function buildWhyFallback({ actor, geographies, eventType, impactPhrase, language }) {
+  if (language === 'zh') {
+    const eventLabel = eventTypeLabel(eventType, 'zh');
+    if (actor) {
+      return ensureTerminalPunctuation(`${actor}相关的${eventLabel}影响${impactPhrase}`, 'zh');
+    }
+    if (geographies.primary) {
+      return ensureTerminalPunctuation(`${geographies.primary}的${eventLabel}影响${impactPhrase}`, 'zh');
+    }
+    return ensureTerminalPunctuation(`这项${eventLabel}影响${impactPhrase}`, 'zh');
+  }
+
+  const eventNoun = eventTypeNounEn(eventType);
+  if (actor) {
+    return ensureTerminalPunctuation(`The ${eventNoun} around ${actor} affects ${impactPhrase}`, 'en');
+  }
+  if (geographies.primary) {
+    return ensureTerminalPunctuation(`The ${eventNoun} in ${geographies.primary} affects ${impactPhrase}`, 'en');
+  }
+  return ensureTerminalPunctuation(`This ${eventNoun} affects ${impactPhrase}`, 'en');
+}
+
 function buildWhyItMatters(record, entities, geographies, eventType, topicLabels, strategicDimensions, rules) {
   const sourceLanguage = record.language === 'zh' ? 'zh' : 'en';
   const effectiveLanguage = rules.language_behavior.why_it_matters_same_as_source
@@ -812,10 +975,21 @@ function buildWhyItMatters(record, entities, geographies, eventType, topicLabels
   const subject = buildWhySubject(entities, geographies, eventType, effectiveLanguage);
   const impactPhrase = buildWhyImpactPhrase(topicLabels, strategicDimensions, effectiveLanguage);
   const useCompactAngle = isSoftContentCandidate(record, topicLabels);
-
-  return effectiveLanguage === 'zh'
+  const hasSpecificAnchor = Boolean(entities.primary[0] || geographies.primary);
+  let why = effectiveLanguage === 'zh'
     ? buildWhyItMattersZh({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules, useCompactAngle })
     : buildWhyItMattersEn({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules, useCompactAngle });
+
+  if (effectiveLanguage === 'en') {
+    const isGeneric = GENERIC_WHY_PHRASES_EN.some((pattern) => pattern.test(why));
+    if (isGeneric || !hasSpecificAnchor) {
+      why = buildWhyFallback({ actor: entities.primary[0] ?? null, geographies, eventType, impactPhrase, language: effectiveLanguage });
+    }
+  } else if (!hasSpecificAnchor) {
+    why = buildWhyFallback({ actor: entities.primary[0] ?? null, geographies, eventType, impactPhrase, language: effectiveLanguage });
+  }
+
+  return why;
 }
 
 function computeOverlap(summary, whyItMatters, rules) {

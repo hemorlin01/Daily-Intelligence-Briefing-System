@@ -183,6 +183,39 @@ test('summary length policy distinguishes full-text and summary-only items', () 
   assert.equal(summaryOnlyWords <= 70, true);
 });
 
+test('summary cleanup removes feed residue without leaving fragments', () => {
+  const record = makeCanonicalMainRecord({
+    article_id: 'summary-residue-clean-1',
+    canonical_text: '',
+    raw_snippet: 'The post Export plan appeared first on Example Feed. Regulators outlined an export plan affecting advanced chips and supplier exposure across multiple regions.'
+  });
+
+  const result = buildSemanticCards({
+    canonicalRecords: [record]
+  });
+
+  const summary = result.cards[0].factual_summary;
+  assert.doesNotMatch(summary, /appeared first on/i);
+  assert.match(summary, /export plan/i);
+});
+
+test('summary avoids broken stubs when a shorter fragment is present', () => {
+  const record = makeCanonicalMainRecord({
+    article_id: 'summary-stub-1',
+    canonical_text: '',
+    raw_snippet: 'Despite turbulence in U.S.',
+    source_provided_summary: 'US regulators outlined a new semiconductor export plan affecting advanced chips and suppliers.'
+  });
+
+  const result = buildSemanticCards({
+    canonicalRecords: [record]
+  });
+
+  const summary = result.cards[0].factual_summary;
+  assert.match(summary, /regulators outlined/i);
+  assert.equal(summary.includes('Despite turbulence in U.S.'), false);
+});
+
 test('summary cleanup removes feed residue fragments', () => {
   const record = makeCanonicalMainRecord({
     article_id: 'summary-residue-1',
@@ -209,6 +242,21 @@ test('why_it_matters stays within intended quality bounds', () => {
   assert.equal(words >= 25, true);
   assert.equal(words <= 55, true);
   assert.doesNotMatch(why, /\bcould\b|\bmay\b|\breframes?\b|\bimplications beyond\b/i);
+});
+
+test('why_it_matters falls back when generic template phrases appear', () => {
+  const record = makeCanonicalMainRecord({
+    article_id: 'why-generic-fallback-1',
+    article_type: 'analysis'
+  });
+
+  const result = buildSemanticCards({
+    canonicalRecords: [record]
+  });
+
+  const why = result.cards[0].why_it_matters;
+  assert.doesNotMatch(why, /clarifies the assumptions/i);
+  assert.doesNotMatch(why, /provides a frame/i);
 });
 
 test('invalid event_type is rejected', () => {
