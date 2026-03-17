@@ -429,9 +429,13 @@ function selectCandidate({
   }
 
   if (SOFT_CONTENT_DOMAINS.has(assignedDomain) && isSoftContentCandidate(candidate)) {
-    const softMinScore = rules.selection.minimum_candidate_score + 0.06;
+    const softScoreBonus = Number(rules.selection.soft_content_score_bonus ?? 0.1);
+    const softMinScore = rules.selection.minimum_candidate_score + softScoreBonus;
     const relevance = candidate.semantic_card.user_relevance_signal ?? 'low';
-    if (candidate.final_composite_score < softMinScore || relevance === 'low') {
+    const relevanceOrder = { low: 0, medium: 1, high: 2 };
+    const minRelevance = relevanceOrder[rules.selection.soft_content_minimum_relevance ?? 'medium'] ?? 1;
+    const candidateRelevance = relevanceOrder[relevance] ?? 0;
+    if (candidate.final_composite_score < softMinScore || candidateRelevance < minRelevance) {
       exclusionReasons.get(candidate.article_id).add('low_value_soft_content');
       return false;
     }

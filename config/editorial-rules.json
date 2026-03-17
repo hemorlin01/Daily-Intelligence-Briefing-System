@@ -5,7 +5,9 @@
     "maximum_target_count": 12,
     "minimum_candidate_score": 0.46,
     "backfill_minimum_candidate_score": 0.5,
-    "healthy_pool_size": 12
+    "healthy_pool_size": 12,
+    "soft_content_score_bonus": 0.1,
+    "soft_content_minimum_relevance": "medium"
   },
   "caps": {
     "source_max_count": 2,
@@ -118,21 +120,21 @@
       "target_count": 1,
       "hard_max_count": 2,
       "soft_min_count": 1,
-      "priority": 8,
+      "priority": 9,
       "adjacent_domains": ["global_macro", "technology", "policy_analysis"]
     },
     "climate_transition": {
       "target_count": 1,
       "hard_max_count": 2,
       "soft_min_count": 1,
-      "priority": 8,
+      "priority": 9,
       "adjacent_domains": ["urban_systems", "policy_analysis", "global_macro"]
     },
     "urban_systems": {
       "target_count": 1,
       "hard_max_count": 2,
       "soft_min_count": 0,
-      "priority": 5,
+      "priority": 6,
       "adjacent_domains": ["climate_transition", "policy_analysis", "lifestyle_signals"]
     },
     "digital_economy": {
@@ -153,14 +155,14 @@
       "target_count": 1,
       "hard_max_count": 1,
       "soft_min_count": 0,
-      "priority": 4,
+      "priority": 2,
       "adjacent_domains": ["lifestyle_signals", "digital_economy", "urban_systems"]
     },
     "lifestyle_signals": {
       "target_count": 1,
       "hard_max_count": 1,
       "soft_min_count": 0,
-      "priority": 3,
+      "priority": 1,
       "adjacent_domains": ["culture_design", "urban_systems", "digital_economy"]
     }
   },
