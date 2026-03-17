@@ -23,6 +23,21 @@ function buildMainPool(entries) {
   return result.mainPool;
 }
 
+function countWords(text) {
+  return (text.match(/\b[\p{L}\p{N}'-]+\b/gu) ?? []).length;
+}
+
+function hasChinese(text) {
+  return /[\u3400-\u9fff]/u.test(text);
+}
+
+function endsWithTerminalPunctuation(text, language) {
+  if (language === 'zh') {
+    return /[。！？]$/.test(text);
+  }
+  return /[.!?]$/.test(text);
+}
+
 function makeCanonicalMainRecord(overrides = {}) {
   const [record] = buildMainPool([
     makeRawEntry('reuters', {
@@ -107,17 +122,71 @@ test('factual_summary follows source language behavior', () => {
   });
 
   assert.equal(result.cards.length, 1);
-  assert.match(result.cards[0].factual_summary, /[\u3400-\u9fff]/u);
+  assert.equal(hasChinese(result.cards[0].factual_summary), true);
+  assert.equal(endsWithTerminalPunctuation(result.cards[0].factual_summary, 'zh'), true);
+  assert.doesNotMatch(result.cards[0].factual_summary, /\.{3}|…/u);
 });
 
-test('why_it_matters defaults to English behavior where configured', () => {
+test('why_it_matters follows source language for English and Chinese items', () => {
   const result = buildSemanticCards({
     canonicalRecords: [
-      makeCanonicalMainRecord()
+      makeCanonicalMainRecord(),
+      {
+        ...makeCanonicalMainRecord({
+          article_id: 'zh-why-1',
+          title: '中国政策调整影响产业布局',
+          url: 'https://example.com/zh-policy',
+          language: 'zh',
+          canonical_text: '中国政策调整影响产业布局，相关部门强调重点领域投资与产业升级方向。'.repeat(4),
+          raw_snippet: '政策调整影响产业布局。',
+          source_id: 'caixin',
+          source_priority_tier: 1
+        }),
+        candidate_disposition: 'main'
+      }
     ]
   });
 
-  assert.doesNotMatch(result.cards[0].why_it_matters, /[\u3400-\u9fff]/u);
+  assert.equal(hasChinese(result.cards[0].why_it_matters), false);
+  assert.equal(hasChinese(result.cards[1].why_it_matters), true);
+});
+
+test('summary length policy distinguishes full-text and summary-only items', () => {
+  const fullTextRecord = makeCanonicalMainRecord({
+    article_id: 'full-text-1',
+    canonical_text: 'Regulators outlined a detailed export plan that affects advanced chips, tooling, and supplier exposure across multiple regions. '.repeat(18),
+    raw_snippet: 'Regulators outlined a detailed export plan affecting advanced chips and tooling.'
+  });
+  const summaryOnlyRecord = makeCanonicalMainRecord({
+    article_id: 'summary-only-1',
+    canonical_text: '',
+    raw_snippet: 'Export regulators outlined a plan affecting advanced chips, tooling, and supplier exposure across regions. Suppliers are adjusting capacity, compliance, and inventory buffers as the rule advances. Executives are assessing how quickly the changes cascade through procurement.',
+    source_provided_summary: 'Regulators outlined an export plan and suppliers are adjusting capacity and compliance in response.'
+  });
+
+  const result = buildSemanticCards({
+    canonicalRecords: [fullTextRecord, summaryOnlyRecord]
+  });
+
+  const fullSummaryWords = countWords(result.cards[0].factual_summary);
+  const summaryOnlyWords = countWords(result.cards[1].factual_summary);
+
+  assert.equal(fullSummaryWords >= 70, true);
+  assert.equal(fullSummaryWords <= 110, true);
+  assert.equal(summaryOnlyWords >= 20, true);
+  assert.equal(summaryOnlyWords <= 70, true);
+});
+
+test('why_it_matters stays within intended quality bounds', () => {
+  const result = buildSemanticCards({
+    canonicalRecords: [makeCanonicalMainRecord()]
+  });
+
+  const why = result.cards[0].why_it_matters;
+  const words = countWords(why);
+  assert.equal(words >= 25, true);
+  assert.equal(words <= 55, true);
+  assert.doesNotMatch(why, /\bcould\b|\bmay\b|\breframes?\b|\bimplications beyond\b/i);
 });
 
 test('invalid event_type is rejected', () => {
@@ -247,8 +316,9 @@ test('why_it_matters is more article-specific than the generic fallback', () => 
   });
 
   const whyItMatters = result.cards[0].why_it_matters;
-  assert.match(whyItMatters, /US|United States|AI competition|digital infrastructure|supply-chain resilience/i);
-  assert.doesNotMatch(whyItMatters, /signals implications beyond the immediate article detail/i);
+  assert.match(whyItMatters, /matters for/i);
+  assert.match(whyItMatters, /policy|competition|compliance|market|risk/i);
+  assert.doesNotMatch(whyItMatters, /implications beyond the immediate article detail/i);
 });
 
 test('summary and why_it_matters overlap is handled without collapsing the fields', () => {

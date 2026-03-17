@@ -81,13 +81,13 @@
     ]
   },
   "domain_priority_order": [
-    "global_macro",
-    "technology",
     "china_economy",
+    "technology",
     "climate_transition",
+    "urban_systems",
+    "global_macro",
     "policy_analysis",
     "digital_economy",
-    "urban_systems",
     "geopolitics",
     "culture_design",
     "lifestyle_signals"

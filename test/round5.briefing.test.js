@@ -172,5 +172,12 @@ test('healthy summary-only feed inputs do not collapse into a degraded two-item 
       runDir: execution.outputDir
     });
     assert.match(summary, /final selected items: \d+/);
+
+    const contentQuality = JSON.parse(readFileSync(join(execution.outputDir, 'content_quality_report.json'), 'utf8'));
+    assert.equal('summary_length_avg' in contentQuality, true);
+    assert.equal('why_it_matters_length_avg' in contentQuality, true);
+
+    const languageReport = JSON.parse(readFileSync(join(execution.outputDir, 'final_briefing_language_report.json'), 'utf8'));
+    assert.equal('selected_items_by_language' in languageReport, true);
   });
 });

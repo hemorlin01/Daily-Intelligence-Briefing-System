@@ -36,11 +36,13 @@ export function loadBriefingSummaryReports(runDir) {
   return {
     candidateFunnel: readJson(join(runDir, 'briefing_candidate_funnel.json')),
     selectionReport: readJson(join(runDir, 'briefing_selection_report.json')),
-    statusReport: readJson(join(runDir, 'briefing_status_report.json'))
+    statusReport: readJson(join(runDir, 'briefing_status_report.json')),
+    languageReport: readJson(join(runDir, 'final_briefing_language_report.json')),
+    contentQualityReport: readJson(join(runDir, 'content_quality_report.json'))
   };
 }
 
-export function formatBriefingOperationalSummary({ candidateFunnel, selectionReport, statusReport, runDir }) {
+export function formatBriefingOperationalSummary({ candidateFunnel, selectionReport, statusReport, languageReport, contentQualityReport, runDir }) {
   const sectionSummary = selectionReport.selected_sections.length === 0
     ? 'none'
     : selectionReport.selected_sections.map((section) => `${section.label}=${section.item_count}`).join(', ');
@@ -50,6 +52,12 @@ export function formatBriefingOperationalSummary({ candidateFunnel, selectionRep
   const degradedReasons = (statusReport.degraded_reasons ?? []).length === 0
     ? 'none'
     : statusReport.degraded_reasons.join(', ');
+  const languageCounts = languageReport?.selected_items_by_language
+    ? formatCounts('language counts', languageReport.selected_items_by_language)
+    : 'language counts: none';
+  const summaryLengthAvg = contentQualityReport
+    ? `avg summary length (en/zh): ${contentQualityReport.summary_length_avg.en}/${contentQualityReport.summary_length_avg.zh}`
+    : 'avg summary length (en/zh): n/a';
 
   return [
     'DIBS Briefing Summary',
@@ -65,6 +73,8 @@ export function formatBriefingOperationalSummary({ candidateFunnel, selectionRep
     `final sections: ${candidateFunnel.final_sections}`,
     `run status: ${statusReport.run_status}`,
     statusReport.run_status === 'degraded' ? `degraded reasons: ${degradedReasons}` : 'degraded reasons: none',
+    languageCounts,
+    summaryLengthAvg,
     formatCounts('section counts', selectionReport.selected_domain_counts),
     `top selected governed sources: ${topSources}`,
     formatCounts('warning flags', Object.fromEntries((statusReport.warning_flags ?? []).map((flag) => [flag, 1])))

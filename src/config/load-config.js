@@ -199,6 +199,36 @@ export function loadSemanticRules(path) {
     throw new Error(`${context}: "english_stop_entities" must be an array`);
   }
 
+  if (typeof rules.language_behavior.factual_summary_same_as_source !== 'boolean') {
+    throw new Error(`${context}: "language_behavior.factual_summary_same_as_source" must be a boolean`);
+  }
+  if (typeof rules.language_behavior.why_it_matters_same_as_source !== 'boolean') {
+    throw new Error(`${context}: "language_behavior.why_it_matters_same_as_source" must be a boolean`);
+  }
+  assertString(rules.language_behavior.fallback_language, 'language_behavior.fallback_language', context);
+
+  const summaryFields = [
+    'english_min_words',
+    'english_max_words',
+    'english_summary_only_min_words',
+    'english_summary_only_max_words',
+    'non_english_min_chars',
+    'non_english_max_chars',
+    'non_english_summary_only_min_chars',
+    'non_english_summary_only_max_chars',
+    'why_it_matters_min_words',
+    'why_it_matters_max_words',
+    'why_it_matters_min_chars',
+    'why_it_matters_max_chars',
+    'full_text_min_chars',
+    'summary_only_min_chars',
+    'overlap_threshold',
+    'token_overlap_threshold'
+  ];
+  for (const field of summaryFields) {
+    assertNumber(rules.summary_rules?.[field], `summary_rules.${field}`, context, (value) => value >= 0);
+  }
+
   return Object.freeze(rules);
 }
 

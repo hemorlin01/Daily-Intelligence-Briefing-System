@@ -1,12 +1,24 @@
 {
   "language_behavior": {
     "factual_summary_same_as_source": true,
-    "why_it_matters_default_language": "en"
+    "why_it_matters_same_as_source": true,
+    "fallback_language": "en"
   },
   "summary_rules": {
-    "english_max_chars": 220,
+    "english_min_words": 70,
+    "english_max_words": 100,
+    "english_summary_only_min_words": 32,
+    "english_summary_only_max_words": 60,
+    "non_english_min_chars": 80,
     "non_english_max_chars": 140,
-    "why_it_matters_max_chars": 220,
+    "non_english_summary_only_min_chars": 40,
+    "non_english_summary_only_max_chars": 90,
+    "why_it_matters_min_words": 30,
+    "why_it_matters_max_words": 50,
+    "why_it_matters_min_chars": 30,
+    "why_it_matters_max_chars": 70,
+    "full_text_min_chars": 600,
+    "summary_only_min_chars": 60,
     "overlap_threshold": 0.72,
     "token_overlap_threshold": 0.55
   },

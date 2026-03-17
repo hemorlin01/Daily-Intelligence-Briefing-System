@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { loadDeliveryRules, loadEditorialRules, loadSourceCatalog } from '../config/load-config.js';
+import { loadDeliveryRules, loadEditorialRules, loadSemanticRules, loadSourceCatalog } from '../config/load-config.js';
 import { EmailDeliveryAdapter } from '../delivery/email-adapter.js';
 import { TelegramDeliveryAdapter } from '../delivery/telegram-adapter.js';
 import { getChannelLedgerEntry, loadDeliveryLedger, recordChannelAttempt, saveDeliveryLedger } from '../delivery/state-store.js';
@@ -11,9 +11,11 @@ import { buildEditorialSelection } from './build-editorial-selection.js';
 import { buildSemanticCards } from './build-semantic-cards.js';
 import { renderBriefing } from './render-briefing.js';
 import { evaluateSchedule, writeSchedulerDebug } from '../scheduler/schedule.js';
+import { normalizeWhitespace } from '../utils/text.js';
 
 const DEFAULT_DELIVERY_RULES_PATH = resolve(process.cwd(), 'config', 'delivery-rules.json');
 const DEFAULT_EDITORIAL_RULES_PATH = resolve(process.cwd(), 'config', 'editorial-rules.json');
+const DEFAULT_SEMANTIC_RULES_PATH = resolve(process.cwd(), 'config', 'semantic-rules.json');
 const DEFAULT_SOURCES_PATH = resolve(process.cwd(), 'config', 'sources.json');
 
 function hashContent(value) {
@@ -41,6 +43,228 @@ function topEntries(map, limit = 5) {
     .map(([key, count]) => ({ key, count }));
 }
 
+function countWords(text) {
+  const normalized = normalizeWhitespace(text);
+  return (normalized.match(/\b[\p{L}\p{N}'-]+\b/gu) ?? []).length;
+}
+
+function countChineseChars(text) {
+  return (normalizeWhitespace(text).match(/[\u3400-\u9fff]/gu) ?? []).length;
+}
+
+function languageKey(value) {
+  if (value === 'zh') {
+    return 'zh';
+  }
+  if (value === 'en') {
+    return 'en';
+  }
+  return 'unknown';
+}
+
+function endsWithTerminalPunctuation(text, language) {
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    return false;
+  }
+  if (language === 'zh') {
+    return /[。！？]$/.test(normalized);
+  }
+  return /[.!?]$/.test(normalized);
+}
+
+function titleContainsSourceSuffix(title, sourceDisplayName) {
+  const normalizedTitle = normalizeWhitespace(title).toLowerCase();
+  const normalizedSource = normalizeWhitespace(sourceDisplayName).toLowerCase();
+  if (!normalizedTitle || !normalizedSource) {
+    return false;
+  }
+  return (
+    normalizedTitle.endsWith(` - ${normalizedSource}`)
+    || normalizedTitle.endsWith(` | ${normalizedSource}`)
+    || normalizedTitle.includes(`${normalizedSource} -`)
+    || normalizedTitle.includes(`${normalizedSource} |`)
+  );
+}
+
+function shouldRenderBylineForReport(item) {
+  return typeof item.author_byline === 'string'
+    && item.author_byline.trim().length > 0
+    && item.author_byline.trim().toLowerCase() !== item.source_display_name.trim().toLowerCase();
+}
+
+function buildContentQualityReport({ editorial, rendered, semanticRules, runTimestamp }) {
+  const summaryLengths = { en: [], zh: [], unknown: [] };
+  const whyLengths = { en: [], zh: [], unknown: [] };
+  const sourceCounts = {};
+  const counts = {
+    summary_incomplete_count: 0,
+    summary_short_count: 0,
+    summary_long_count: 0,
+    why_short_count: 0,
+    why_long_count: 0,
+    why_generic_count: 0,
+    byline_shown_count: 0,
+    byline_total_count: 0,
+    summary_limited_context_count: 0
+  };
+
+  const genericWhyPatterns = {
+    en: [
+      /\bcould\b/i,
+      /\bmay\b/i,
+      /\bmight\b/i,
+      /\breframes?\b/i,
+      /\bshape(s|d)?\b/i,
+      /\bimplications beyond\b/i
+    ],
+    zh: [/可能/, /或将/, /重新定义/]
+  };
+
+  for (const item of editorial.result.selected_items) {
+    const language = languageKey(item.language);
+    const summary = normalizeWhitespace(item.factual_summary);
+    const why = normalizeWhitespace(item.why_it_matters);
+    const isChinese = language === 'zh';
+    const summaryLength = isChinese ? countChineseChars(summary) : countWords(summary);
+    const whyLength = isChinese ? countChineseChars(why) : countWords(why);
+
+    summaryLengths[language].push(summaryLength);
+    whyLengths[language].push(whyLength);
+
+    if (!endsWithTerminalPunctuation(summary, isChinese ? 'zh' : 'en')) {
+      counts.summary_incomplete_count += 1;
+    }
+
+    const summaryFromLimitedContext = item.warnings?.some((warning) => warning.code === 'weak_canonical_text');
+    if (summaryFromLimitedContext) {
+      counts.summary_limited_context_count += 1;
+    }
+
+    const summaryMin = isChinese
+      ? (summaryFromLimitedContext ? semanticRules.summary_rules.non_english_summary_only_min_chars : semanticRules.summary_rules.non_english_min_chars)
+      : (summaryFromLimitedContext ? semanticRules.summary_rules.english_summary_only_min_words : semanticRules.summary_rules.english_min_words);
+    const summaryMax = isChinese
+      ? (summaryFromLimitedContext ? semanticRules.summary_rules.non_english_summary_only_max_chars : semanticRules.summary_rules.non_english_max_chars)
+      : (summaryFromLimitedContext ? semanticRules.summary_rules.english_summary_only_max_words : semanticRules.summary_rules.english_max_words);
+
+    if (summaryLength < summaryMin) {
+      counts.summary_short_count += 1;
+    }
+    if (summaryLength > summaryMax) {
+      counts.summary_long_count += 1;
+    }
+
+    const whyMin = isChinese ? semanticRules.summary_rules.why_it_matters_min_chars : semanticRules.summary_rules.why_it_matters_min_words;
+    const whyMax = isChinese ? semanticRules.summary_rules.why_it_matters_max_chars : semanticRules.summary_rules.why_it_matters_max_words;
+    if (whyLength < whyMin) {
+      counts.why_short_count += 1;
+    }
+    if (whyLength > whyMax) {
+      counts.why_long_count += 1;
+    }
+
+    const genericPatterns = genericWhyPatterns[language] ?? [];
+    if (genericPatterns.some((pattern) => pattern.test(why))) {
+      counts.why_generic_count += 1;
+    }
+
+    incrementCounter(sourceCounts, item.source_display_name);
+    counts.byline_total_count += 1;
+    if (shouldRenderBylineForReport(item)) {
+      counts.byline_shown_count += 1;
+    }
+  }
+
+  const average = (values) => values.length === 0 ? 0 : Number((values.reduce((total, entry) => total + entry, 0) / values.length).toFixed(2));
+
+  return {
+    run_timestamp: runTimestamp,
+    selected_count: editorial.result.selected_count,
+    selected_items_by_source: sourceCounts,
+    selected_items_by_section: Object.fromEntries(rendered.blocks.map((block) => [block.label, block.items.length])),
+    summary_length_avg: {
+      en: average(summaryLengths.en),
+      zh: average(summaryLengths.zh),
+      unknown: average(summaryLengths.unknown)
+    },
+    why_it_matters_length_avg: {
+      en: average(whyLengths.en),
+      zh: average(whyLengths.zh),
+      unknown: average(whyLengths.unknown)
+    },
+    summary_length_range: {
+      en: { min: Math.min(...summaryLengths.en, Infinity) || 0, max: Math.max(...summaryLengths.en, 0) },
+      zh: { min: Math.min(...summaryLengths.zh, Infinity) || 0, max: Math.max(...summaryLengths.zh, 0) }
+    },
+    why_it_matters_length_range: {
+      en: { min: Math.min(...whyLengths.en, Infinity) || 0, max: Math.max(...whyLengths.en, 0) },
+      zh: { min: Math.min(...whyLengths.zh, Infinity) || 0, max: Math.max(...whyLengths.zh, 0) }
+    },
+    ...counts
+  };
+}
+
+function buildFinalBriefingLanguageReport({ editorial, rendered, runTimestamp }) {
+  const languageCounts = {};
+  for (const item of editorial.result.selected_items) {
+    incrementCounter(languageCounts, languageKey(item.language));
+  }
+
+  const sections = rendered.blocks.map((block) => {
+    const counts = {};
+    for (const item of block.items) {
+      incrementCounter(counts, languageKey(item.language));
+    }
+    return {
+      block_id: block.block_id,
+      label: block.label,
+      item_count: block.items.length,
+      language_counts: counts
+    };
+  });
+
+  return {
+    run_timestamp: runTimestamp,
+    selected_items_by_language: languageCounts,
+    sections
+  };
+}
+
+function buildFinalBriefingStyleAudit({ editorial, rendered, runTimestamp }) {
+  const titleIssues = [];
+  let sourceSuffixCount = 0;
+
+  for (const item of editorial.result.selected_items) {
+    if (titleContainsSourceSuffix(item.title, item.source_display_name)) {
+      sourceSuffixCount += 1;
+      titleIssues.push({
+        article_id: item.article_id,
+        title: item.title,
+        source_display_name: item.source_display_name,
+        issue: 'title_contains_source_suffix'
+      });
+    }
+  }
+
+  return {
+    run_timestamp: runTimestamp,
+    selected_count: editorial.result.selected_count,
+    title_source_suffix_count: sourceSuffixCount,
+    byline_shown_count: editorial.result.selected_items.filter((item) => shouldRenderBylineForReport(item)).length,
+    ordered_items: rendered.blocks.flatMap((block) => block.items.map((item) => ({
+      article_id: item.article_id,
+      title: item.title,
+      source_id: item.source_id,
+      source_display_name: item.source_display_name,
+      primary_domain: item.primary_domain,
+      language: languageKey(item.language),
+      block_id: block.block_id
+    }))),
+    title_fidelity_issues: titleIssues
+  };
+}
+
 function resolveChannelDestination(channelConfig, environment) {
   return environment[channelConfig.destination_env] ?? channelConfig.destination_fallback;
 }
@@ -60,6 +284,9 @@ function buildRunBundle({
     briefing_selection_report: resolve(outputDir, 'briefing_selection_report.json'),
     briefing_status_report: resolve(outputDir, 'briefing_status_report.json'),
     attribution_audit_report: resolve(outputDir, 'attribution_audit_report.json'),
+    content_quality_report: resolve(outputDir, 'content_quality_report.json'),
+    final_briefing_language_report: resolve(outputDir, 'final_briefing_language_report.json'),
+    final_briefing_style_audit: resolve(outputDir, 'final_briefing_style_audit.json'),
     semantic_diagnostics: resolve(outputDir, 'semantic_diagnostics.json'),
     editorial_selection_debug: resolve(outputDir, 'editorial_selection_debug.json'),
     rendering_debug: resolve(outputDir, 'rendering_debug.json'),
@@ -451,6 +678,9 @@ function writeBriefingDiagnostics(outputDir, reports) {
   writeJson(resolve(outputDir, 'briefing_selection_report.json'), reports.selectionReport);
   writeJson(resolve(outputDir, 'briefing_status_report.json'), reports.statusReport);
   writeJson(resolve(outputDir, 'attribution_audit_report.json'), reports.attributionAudit);
+  writeJson(resolve(outputDir, 'content_quality_report.json'), reports.contentQuality);
+  writeJson(resolve(outputDir, 'final_briefing_language_report.json'), reports.languageReport);
+  writeJson(resolve(outputDir, 'final_briefing_style_audit.json'), reports.styleAudit);
 }
 
 export async function deliverRunBundle({
@@ -569,6 +799,24 @@ export async function executeDibsRun({
       telegram_entries: rendered.telegram.entry_article_ids.length
     });
 
+    const semanticRules = loadSemanticRules(DEFAULT_SEMANTIC_RULES_PATH);
+    const contentQuality = buildContentQualityReport({
+      editorial,
+      rendered,
+      semanticRules,
+      runTimestamp
+    });
+    const languageReport = buildFinalBriefingLanguageReport({
+      editorial,
+      rendered,
+      runTimestamp
+    });
+    const styleAudit = buildFinalBriefingStyleAudit({
+      editorial,
+      rendered,
+      runTimestamp
+    });
+
     writeBriefingDiagnostics(outputDir, {
       candidateFunnel: buildBriefingCandidateFunnel({
         candidate,
@@ -595,7 +843,10 @@ export async function executeDibsRun({
         editorial,
         sourceCatalog,
         runTimestamp
-      })
+      }),
+      contentQuality,
+      languageReport,
+      styleAudit
     });
 
     const bundle = buildRunBundle({

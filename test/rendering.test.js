@@ -260,7 +260,75 @@ test('email renderer includes all selected items', () => {
   for (const item of selectionResult.selected_items) {
     assert.equal(rendered.email.content.includes(item.title), true);
     assert.equal(rendered.email.content.includes(item.source_display_name), true);
+    assert.equal(rendered.email.content.includes('Keywords:'), false);
   }
+});
+
+test('headlines are preserved and source/byline are rendered separately', () => {
+  const selectionResult = buildSelectedResult();
+  const rendered = renderBriefing({ selectionResult });
+
+  for (const item of selectionResult.selected_items) {
+    assert.equal(rendered.email.content.includes(`${item.title} - ${item.source_display_name}`), false);
+    assert.equal(rendered.email.content.includes(`${item.title} | ${item.source_display_name}`), false);
+    assert.equal(rendered.telegram.content.includes(`${item.title} - ${item.source_display_name}`), false);
+    assert.equal(rendered.telegram.content.includes(`${item.title} | ${item.source_display_name}`), false);
+    assert.equal(rendered.telegram.content.includes(`${item.title} — ${item.source_display_name}`), false);
+    assert.equal(rendered.email.content.includes(`Source: ${item.source_display_name}`), true);
+  }
+});
+
+test('telegram and markdown outputs omit keywords', () => {
+  const selectionResult = buildSelectedResult();
+  const rendered = renderBriefing({ selectionResult });
+
+  assert.equal(rendered.telegram.content.includes('Keywords:'), false);
+  assert.equal(rendered.markdown.content.includes('Keywords:'), false);
+});
+
+test('rendered sections remain coherent for compact briefings', () => {
+  const selectionResult = buildSelectedResult([
+    'china_economy',
+    'technology',
+    'climate_transition',
+    'global_macro',
+    'policy_analysis',
+    'urban_systems'
+  ]);
+  const rendered = renderBriefing({ selectionResult });
+
+  assert.equal(rendered.blocks.length <= 5, true);
+});
+
+test('mixed-language briefing preserves Chinese and English content', () => {
+  const englishCard = makeSemanticCard({
+    article_id: 'en-1',
+    title: 'AI suppliers raise capacity guidance',
+    language: 'en',
+    topic_labels: ['technology'],
+    factual_summary: 'Suppliers raised capacity guidance as export rules shifted and deployment plans were updated across the quarter.',
+    why_it_matters: 'AI supplier capacity matters for technology competition because it shapes deployment pace and pricing expectations.',
+    metadata: { source_display_name: 'Reuters' }
+  });
+  const chineseCard = makeSemanticCard({
+    article_id: 'zh-1',
+    source_id: 'caixin',
+    title: '中国制造业投资继续扩张',
+    language: 'zh',
+    topic_labels: ['china_economy'],
+    factual_summary: '中国制造业投资继续扩张，地方政策加快推进重点项目。',
+    why_it_matters: '这对中国经济与政策走向很关键，因为政策边界正在调整。',
+    metadata: { source_display_name: 'Caixin' }
+  });
+
+  const selectionResult = buildEditorialSelection({
+    semanticCards: [englishCard, chineseCard],
+    runTimestamp: FIXED_NOW.toISOString()
+  }).result;
+  const rendered = renderBriefing({ selectionResult });
+
+  assert.match(rendered.email.content, /中国制造业投资继续扩张/);
+  assert.match(rendered.email.content, /AI suppliers raise capacity guidance/);
 });
 
 test('markdown renderer includes all selected items', () => {
@@ -312,7 +380,7 @@ test('telegram renderer logs truncation or omission when needed', () => {
     });
 
     assert.equal(
-      rendered.diagnostics.truncation_counts.telegram_total_count > 0 || rendered.telegram.omitted_article_ids.length > 0,
+      rendered.diagnostics.compaction_counts.telegram_total_count > 0 || rendered.telegram.omitted_article_ids.length > 0,
       true
     );
     assert.equal(
@@ -399,6 +467,6 @@ test('rendering artifacts and diagnostics are generated', () => {
 test('rendering rules config loads with expected block mapping', () => {
   const rules = loadRenderingRules(RENDERING_RULES_PATH);
 
-  assert.equal(rules.blocks.domain_to_block.global_macro, 'global_economy_markets');
-  assert.equal(rules.blocks.domain_to_block.geopolitics, 'policy_strategy');
+  assert.equal(rules.blocks.domain_to_block.global_macro, 'markets_policy');
+  assert.equal(rules.blocks.domain_to_block.geopolitics, 'china_geopolitics');
 });

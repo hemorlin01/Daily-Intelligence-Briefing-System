@@ -17,6 +17,83 @@ function statusLabel(selectionResult, rules) {
   return rules.status_display.labels[selectionResult.run_status];
 }
 
+function splitSentencesForRender(text, language) {
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    return [];
+  }
+
+  if (language === 'zh') {
+    const matches = normalized.match(/[^。！？]+[。！？]?/gu) ?? [];
+    return matches.map((sentence) => sentence.trim()).filter(Boolean);
+  }
+
+  return normalized
+    .split(/(?<=[.!?])\s+/u)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+}
+
+function splitSentencesForRenderNormalized(text, language) {
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    return [];
+  }
+
+  if (language === 'zh') {
+    const matches = normalized.match(/[^。！？]+[。！？]?/gu) ?? [];
+    return matches.map((sentence) => sentence.trim()).filter(Boolean);
+  }
+
+  return normalized
+    .split(/(?<=[.!?])\s+/u)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+}
+
+function splitSentencesForRenderClean(text, language) {
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    return [];
+  }
+
+  if (language === 'zh') {
+    const matches = normalized.match(/[^。！？]+[。！？]?/gu) ?? [];
+    return matches.map((sentence) => sentence.trim()).filter(Boolean);
+  }
+
+  return normalized
+    .split(/(?<=[.!?])\s+/u)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+}
+
+function compactText(text, language, maxChars) {
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    return { text: '', compacted: false };
+  }
+
+  const sentences = splitSentencesForRenderClean(normalized, language);
+  if (sentences.length === 0) {
+    return { text: normalized, compacted: false };
+  }
+
+  const first = sentences[0];
+  if (sentences.length === 1) {
+    return { text: first, compacted: false };
+  }
+
+  const connector = language === 'zh' ? '' : ' ';
+  const second = sentences[1];
+  const combined = `${first}${connector}${second}`;
+  if (combined.length <= maxChars) {
+    return { text: combined, compacted: true };
+  }
+
+  return { text: first, compacted: true };
+}
+
 function formatKeywords(keywords) {
   return keywords.join(', ');
 }
@@ -83,19 +160,18 @@ function renderEmail(selectionResult, blocks, rules, runTimestamp) {
   const entryArticleIds = [];
   for (const block of blocks) {
     lines.push(block.label);
+    lines.push('-'.repeat(block.label.length));
+    lines.push('');
     for (const item of block.items) {
       entryArticleIds.push(item.article_id);
-      lines.push(`- ${item.title}`);
-      lines.push(`  Source: ${item.source_display_name}`);
+      lines.push(item.title);
+      lines.push(`Source: ${item.source_display_name}`);
       if (shouldRenderByline(item)) {
-        lines.push(`  Byline: ${item.author_byline}`);
+        lines.push(`Byline: ${item.author_byline}`);
       }
-      lines.push(`  URL: ${item.url}`);
-      if (rules.email.show_keywords) {
-        lines.push(`  Keywords: ${formatKeywords(item.candidate_keywords)}`);
-      }
-      lines.push(`  Summary: ${normalizeWhitespace(item.factual_summary)}`);
-      lines.push(`  Why it matters: ${normalizeWhitespace(item.why_it_matters)}`);
+      lines.push(`Summary: ${normalizeWhitespace(item.factual_summary)}`);
+      lines.push(`Why it matters: ${normalizeWhitespace(item.why_it_matters)}`);
+      lines.push(`Read: ${item.url}`);
       lines.push('');
     }
   }
@@ -134,9 +210,8 @@ function renderMarkdown(selectionResult, blocks, rules, runTimestamp) {
       if (shouldRenderByline(item)) {
         lines.push(`- Byline: ${item.author_byline}`);
       }
-      lines.push(`- URL: ${item.url}`);
+      lines.push(`- Read: [Read article](${item.url})`);
       lines.push(`- Primary domain: ${item.primary_domain}`);
-      lines.push(`- Keywords: ${formatKeywords(item.candidate_keywords)}`);
       lines.push(`- Selection reasons: ${item.selection_reason_codes.join(', ')}`);
       lines.push('');
       lines.push(`**Summary**: ${normalizeWhitespace(item.factual_summary)}`);
@@ -164,7 +239,7 @@ function renderTelegramForStage(selectionResult, blocks, rules, runTimestamp, st
   ];
 
   const entryArticleIds = [];
-  const truncation = {
+  const compaction = {
     summary_count: 0,
     why_count: 0,
     total_count: 0
@@ -176,32 +251,35 @@ function renderTelegramForStage(selectionResult, blocks, rules, runTimestamp, st
 
     for (const item of block.items) {
       entryArticleIds.push(item.article_id);
-      const summary = truncateText(item.factual_summary, stage.summary_max_chars);
-      const why = truncateText(item.why_it_matters, stage.why_max_chars);
+      const language = item.language === 'zh' ? 'zh' : 'en';
+      const summary = compactText(item.factual_summary, language, stage.summary_max_chars);
+      const why = compactText(item.why_it_matters, language, stage.why_max_chars);
 
-      if (summary.truncated) {
-        truncation.summary_count += 1;
+      if (summary.compacted) {
+        compaction.summary_count += 1;
       }
-      if (why.truncated) {
-        truncation.why_count += 1;
+      if (why.compacted) {
+        compaction.why_count += 1;
       }
 
-      lines.push(`${item.title} — ${item.source_display_name}`);
+      lines.push(item.title);
+      lines.push(`Source: ${item.source_display_name}`);
       if (shouldRenderByline(item)) {
         lines.push(`Byline: ${item.author_byline}`);
       }
       lines.push(`Summary: ${summary.text}`);
-      lines.push(`Why: ${why.text}`);
-      lines.push(item.url);
+      lines.push(`Why it matters: ${why.text}`);
+      lines.push(`Read: ${item.url}`);
+      lines.push('');
     }
   }
 
-  truncation.total_count = truncation.summary_count + truncation.why_count;
+  compaction.total_count = compaction.summary_count + compaction.why_count;
 
   return {
     content: lines.join('\n'),
     entry_article_ids: entryArticleIds,
-    truncation
+    compaction
   };
 }
 
@@ -295,10 +373,10 @@ function buildRenderingDiagnostics(selectionResult, blocks, rendered, rules) {
       telegram: rendered.telegram.entry_article_ids.length,
       markdown: rendered.markdown.entry_article_ids.length
     },
-    truncation_counts: {
-      telegram_summary_count: rendered.telegram.truncation.summary_count,
-      telegram_why_count: rendered.telegram.truncation.why_count,
-      telegram_total_count: rendered.telegram.truncation.total_count
+    compaction_counts: {
+      telegram_summary_count: rendered.telegram.compaction.summary_count,
+      telegram_why_count: rendered.telegram.compaction.why_count,
+      telegram_total_count: rendered.telegram.compaction.total_count
     },
     telegram: {
       length_budget_chars: rules.telegram.length_budget_chars,

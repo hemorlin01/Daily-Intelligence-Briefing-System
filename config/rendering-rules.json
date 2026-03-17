@@ -14,41 +14,31 @@
   },
   "blocks": {
     "order": [
-      "global_economy_markets",
-      "technology_industry",
-      "china_developments",
-      "climate_energy",
-      "urban_systems",
-      "policy_strategy",
-      "culture_design"
+      "china_geopolitics",
+      "technology_digital",
+      "climate_urban",
+      "markets_policy",
+      "culture_lifestyle"
     ],
     "definitions": {
-      "global_economy_markets": {
-        "label": "Global Economy & Markets",
-        "domains": ["global_macro"]
+      "china_geopolitics": {
+        "label": "China & Geopolitics",
+        "domains": ["china_economy", "geopolitics"]
       },
-      "technology_industry": {
-        "label": "Technology & Industry",
+      "technology_digital": {
+        "label": "Technology & Digital Economy",
         "domains": ["technology", "digital_economy"]
       },
-      "china_developments": {
-        "label": "China Developments",
-        "domains": ["china_economy"]
+      "climate_urban": {
+        "label": "Climate, Energy & Urban Systems",
+        "domains": ["climate_transition", "urban_systems"]
       },
-      "climate_energy": {
-        "label": "Climate & Energy",
-        "domains": ["climate_transition"]
+      "markets_policy": {
+        "label": "Global Economy & Policy",
+        "domains": ["global_macro", "policy_analysis"]
       },
-      "urban_systems": {
-        "label": "Urban Systems",
-        "domains": ["urban_systems"]
-      },
-      "policy_strategy": {
-        "label": "Policy & Strategy",
-        "domains": ["policy_analysis", "geopolitics"]
-      },
-      "culture_design": {
-        "label": "Culture & Design",
+      "culture_lifestyle": {
+        "label": "Culture & Lifestyle",
         "domains": ["culture_design", "lifestyle_signals"]
       }
     }
@@ -56,7 +46,7 @@
   "email": {
     "format": "text",
     "include_footer": true,
-    "show_keywords": true,
+    "show_keywords": false,
     "entry_separator": "\n"
   },
   "telegram": {

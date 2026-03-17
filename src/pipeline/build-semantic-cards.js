@@ -44,6 +44,104 @@ function detectLanguageAmbiguity(record, textBlob, warnings) {
   }
 }
 
+function countWords(text) {
+  const normalized = normalizeWhitespace(text);
+  return (normalized.match(/\b[\p{L}\p{N}'-]+\b/gu) ?? []).length;
+}
+
+function countChineseChars(text) {
+  return (normalizeWhitespace(text).match(/[\u3400-\u9fff]/gu) ?? []).length;
+}
+
+function ensureTerminalPunctuation(text, language) {
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    return '';
+  }
+  if (language === 'zh') {
+    return /[。！？]$/.test(normalized) ? normalized : `${normalized}。`;
+  }
+  return /[.!?]$/.test(normalized) ? normalized : `${normalized}.`;
+}
+
+function splitSentencesNormalized(text, language) {
+  const normalized = normalizeWhitespace(text);
+  if (!normalized) {
+    return [];
+  }
+
+  if (language === 'zh') {
+    const matches = normalized.match(/[^。！？]+[。！？]?/gu) ?? [];
+    return matches.map((sentence) => sentence.trim()).filter(Boolean);
+  }
+
+  return normalized
+    .split(/(?<=[.!?])\s+/u)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean);
+}
+
+function collectSentences(texts, language) {
+  const seen = new Set();
+  const ordered = [];
+  for (const text of texts) {
+    for (const sentence of splitSentencesNormalized(text, language)) {
+      const normalized = normalizeWhitespace(sentence);
+      if (!normalized) {
+        continue;
+      }
+      const key = language === 'zh' ? normalized : normalized.toLowerCase();
+      if (seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      ordered.push(normalized);
+    }
+  }
+  return ordered;
+}
+
+function buildSummaryFromSentences({ sentences, language, minWords, maxWords, minChars, maxChars }) {
+  if (sentences.length === 0) {
+    return '';
+  }
+
+  const selected = [];
+  let count = 0;
+  const isChinese = language === 'zh';
+
+  for (const sentence of sentences) {
+    const length = isChinese ? countChineseChars(sentence) : countWords(sentence);
+    if (selected.length === 0) {
+      selected.push(sentence);
+      count += length;
+      continue;
+    }
+
+    if (isChinese) {
+      if (count >= minChars && count + length > maxChars) {
+        break;
+      }
+    } else if (count >= minWords && count + length > maxWords) {
+      break;
+    }
+
+    selected.push(sentence);
+    count += length;
+
+    if (isChinese && count >= minChars && count >= maxChars) {
+      break;
+    }
+    if (!isChinese && count >= minWords && count >= maxWords) {
+      break;
+    }
+  }
+
+  const joined = isChinese ? selected.join('') : selected.join(' ');
+  const cleaned = joined.replace(/(\.\.\.|…)+$/u, '').trim();
+  return ensureTerminalPunctuation(cleaned, language);
+}
+
 function splitSentences(text, language) {
   const normalized = normalizeWhitespace(text);
   if (!normalized) {
@@ -87,15 +185,45 @@ function truncateForLanguage(text, language, maxChars) {
 }
 
 function summarizeFactually(record, rules, warnings) {
-  const language = record.language === 'zh' ? 'zh' : 'en';
-  const maxChars = language === 'zh'
-    ? rules.summary_rules.non_english_max_chars
-    : rules.summary_rules.english_max_chars;
-  const lead = pickLeadSentence(record, language);
-  const summary = truncateForLanguage(lead, language, maxChars);
+  const sourceLanguage = record.language === 'zh' ? 'zh' : 'en';
+  const language = rules.language_behavior.factual_summary_same_as_source
+    ? sourceLanguage
+    : (rules.language_behavior.fallback_language || 'en');
+  const hasFullText = typeof record.canonical_text === 'string'
+    && record.canonical_text.length >= rules.summary_rules.full_text_min_chars;
+  const hasSnippet = typeof record.raw_snippet === 'string' && record.raw_snippet.length >= rules.summary_rules.summary_only_min_chars;
+  const hasSummary = typeof record.source_provided_summary === 'string' && record.source_provided_summary.length >= rules.summary_rules.summary_only_min_chars;
 
-  if (!record.canonical_text || record.canonical_text.length < 200) {
-    addWarning(warnings, 'weak_canonical_text', 'Canonical text is weak; factual summary leans on title/snippet.', 'warning');
+  const primaryTexts = hasFullText
+    ? [record.canonical_text, record.raw_snippet, record.source_provided_summary]
+    : [record.raw_snippet, record.source_provided_summary, record.canonical_text];
+
+  const sentences = collectSentences(primaryTexts.filter(Boolean), language);
+  if (sentences.length === 0 && record.title) {
+    sentences.push(record.title);
+    addWarning(warnings, 'summary_from_title', 'Factual summary falls back to the headline because no other text was available.', 'info');
+  }
+
+  if (!hasFullText) {
+    addWarning(warnings, 'weak_canonical_text', 'Canonical text is limited; summary leans on feed snippets or summaries.', 'warning');
+  }
+
+  const summary = language === 'zh'
+    ? buildSummaryFromSentences({
+      sentences,
+      language,
+      minChars: hasFullText ? rules.summary_rules.non_english_min_chars : rules.summary_rules.non_english_summary_only_min_chars,
+      maxChars: hasFullText ? rules.summary_rules.non_english_max_chars : rules.summary_rules.non_english_summary_only_max_chars
+    })
+    : buildSummaryFromSentences({
+      sentences,
+      language,
+      minWords: hasFullText ? rules.summary_rules.english_min_words : rules.summary_rules.english_summary_only_min_words,
+      maxWords: hasFullText ? rules.summary_rules.english_max_words : rules.summary_rules.english_summary_only_max_words
+    });
+
+  if (!hasFullText && !hasSnippet && !hasSummary) {
+    addWarning(warnings, 'summary_limited_context', 'Summary is constrained by limited feed text.', 'info');
   }
 
   return summary;
@@ -322,6 +450,23 @@ function implicationFromTopic(topic) {
   return map[topic] ?? 'broader strategic conditions';
 }
 
+function implicationFromTopicZh(topic) {
+  const map = {
+    global_macro: '宏观与市场预期',
+    geopolitics: '地缘风险与政策判断',
+    technology: '技术竞争与产业节奏',
+    china_economy: '中国经济与政策走向',
+    climate_transition: '气候与能源转型节奏',
+    urban_systems: '城市治理与基础设施决策',
+    digital_economy: '平台与数字商业模式',
+    policy_analysis: '监管与制度安排',
+    culture_design: '文化与设计信号',
+    lifestyle_signals: '消费与生活方式趋势'
+  };
+
+  return map[topic] ?? '结构性判断';
+}
+
 function implicationFromStrategicDimension(label) {
   const map = {
     supply_chain: 'supply-chain resilience',
@@ -343,10 +488,56 @@ function implicationFromStrategicDimension(label) {
   return map[label] ?? 'structural relevance';
 }
 
-function buildWhySubject(entities, geographies, eventType) {
+function implicationFromStrategicDimensionZh(label) {
+  const map = {
+    supply_chain: '供应链韧性',
+    industrial_policy: '产业政策方向',
+    climate_risk: '气候风险与适应',
+    platform_power: '平台竞争与议价',
+    capital_markets: '资本配置与市场定价',
+    consumer_shift: '消费结构变化',
+    energy_transition: '能源转型与电力系统',
+    urban_governance: '城市治理与公共服务',
+    digital_infrastructure: '数字基础设施建设',
+    regulation: '监管压力',
+    labor: '劳动力与就业',
+    geopolitics: '地缘政治',
+    trade: '贸易与关税',
+    public_health: '公共卫生',
+    AI_competition: 'AI 竞争'
+  };
+  return map[label] ?? '结构性判断';
+}
+
+function eventTypeLabel(eventType, language) {
+  if (language !== 'zh') {
+    return eventType.replace(/_/g, ' ');
+  }
+
+  const map = {
+    policy_move: '政策变化',
+    earnings_result: '业绩结果',
+    regulatory_shift: '监管调整',
+    product_launch: '产品发布',
+    infrastructure_project: '基础设施项目',
+    conflict_escalation: '冲突升级',
+    market_signal: '市场信号',
+    long_form_analysis: '深度分析',
+    executive_change: '管理层变动',
+    scientific_finding: '科研发现',
+    legal_action: '法律行动',
+    funding_or_deal: '融资或交易',
+    opinion_or_argument: '观点文章'
+  };
+  return map[eventType] ?? '重要动态';
+}
+
+function buildWhySubject(entities, geographies, eventType, language) {
   const primaryEntity = entities.primary[0] ?? null;
   if (primaryEntity && geographies.primary) {
-    return `${primaryEntity} in ${geographies.primary}`;
+    return language === 'zh'
+      ? `${primaryEntity}（${geographies.primary}）`
+      : `${primaryEntity} in ${geographies.primary}`;
   }
 
   if (primaryEntity) {
@@ -354,51 +545,192 @@ function buildWhySubject(entities, geographies, eventType) {
   }
 
   if (geographies.primary) {
-    return `${eventType.replace(/_/g, ' ')} developments in ${geographies.primary}`;
+    return language === 'zh'
+      ? `${geographies.primary}的${eventTypeLabel(eventType, language)}`
+      : `${eventType.replace(/_/g, ' ')} developments in ${geographies.primary}`;
   }
 
-  return `this ${eventType.replace(/_/g, ' ')}`;
+  return language === 'zh'
+    ? `该${eventTypeLabel(eventType, language)}`
+    : `this ${eventType.replace(/_/g, ' ')}`;
 }
 
-function buildWhyImpactPhrase(topicLabels, strategicDimensions) {
+function buildWhyImpactPhrase(topicLabels, strategicDimensions, language) {
   const primaryTopic = topicLabels[0] ?? 'policy_analysis';
   const primaryDimension = strategicDimensions[0] ?? null;
-  return primaryDimension
-    ? implicationFromStrategicDimension(primaryDimension)
+  if (primaryDimension) {
+    return language === 'zh'
+      ? implicationFromStrategicDimensionZh(primaryDimension)
+      : implicationFromStrategicDimension(primaryDimension);
+  }
+
+  return language === 'zh'
+    ? implicationFromTopicZh(primaryTopic)
     : implicationFromTopic(primaryTopic);
 }
 
-function buildWhyTemplate(eventType, subject, impactPhrase) {
+function buildWhyAngleEn(eventType) {
   const templates = {
-    policy_move: `${subject} could reset ${impactPhrase} assumptions as official priorities start to move.`,
-    regulatory_shift: `${subject} could change ${impactPhrase} by tightening the rules around how companies operate.`,
-    legal_action: `${subject} could reshape ${impactPhrase} because legal pressure can alter strategic room to maneuver.`,
-    earnings_result: `${subject} is a useful read-through for ${impactPhrase}, especially around how operators and investors recalibrate.`,
-    market_signal: `${subject} is a useful signal for ${impactPhrase}, not just a one-day headline.`,
-    funding_or_deal: `${subject} could shift ${impactPhrase} by changing capital, ownership, or competitive positioning.`,
-    product_launch: `${subject} could alter ${impactPhrase} if it changes the pace or direction of competitive execution.`,
-    executive_change: `${subject} could alter ${impactPhrase} if leadership priorities start to shift.`,
-    infrastructure_project: `${subject} could change ${impactPhrase} by setting a new operating baseline for later decisions.`,
-    scientific_finding: `${subject} could shift ${impactPhrase} because new evidence often changes the baseline for policy or investment choices.`,
-    conflict_escalation: `${subject} raises the stakes for ${impactPhrase}, with broader effects on risk planning and policy assumptions.`,
-    long_form_analysis: `${subject} reframes ${impactPhrase} in a way that could shape how later developments are interpreted.`,
-    opinion_or_argument: `${subject} reframes ${impactPhrase} and may influence how decision-makers read the next set of developments.`
+    policy_move: 'it signals where policy priorities are tightening or loosening and how enforcement will land',
+    regulatory_shift: 'it changes compliance costs and competitive constraints for operators',
+    legal_action: 'it changes legal risk and settlement leverage for affected players',
+    earnings_result: 'it shows how demand, margins, or guidance are shifting for operators and investors',
+    market_signal: 'it resets near-term pricing and risk assumptions in the market',
+    funding_or_deal: 'it reshapes ownership or capital flow, shifting competitive positioning',
+    product_launch: 'it indicates where capability or adoption is moving in the market',
+    executive_change: 'it can redirect strategy and execution in the organization',
+    infrastructure_project: 'it sets a new baseline for capacity, logistics, or mobility decisions',
+    scientific_finding: 'it updates the evidence base used for policy or investment decisions',
+    conflict_escalation: 'it raises cross-border risk assumptions and policy responses',
+    long_form_analysis: 'it provides a frame for interpreting upcoming policy or market decisions',
+    opinion_or_argument: 'it signals the narrative influencing decision-makers and market sentiment'
   };
 
-  return templates[eventType] ?? `${subject} could alter ${impactPhrase} in ways that matter beyond the immediate article.`;
+  return templates[eventType] ?? 'it sets a clear signal for how to read the next decision cycle';
+}
+
+function buildWhyAngleEnCompact(eventType) {
+  const templates = {
+    policy_move: 'policy priorities are shifting and enforcement is moving with them',
+    regulatory_shift: 'compliance costs and competitive constraints are changing',
+    legal_action: 'legal risk and leverage are moving',
+    earnings_result: 'demand and margin signals are shifting',
+    market_signal: 'near-term pricing assumptions are moving',
+    funding_or_deal: 'capital and ownership are reshaping competition',
+    product_launch: 'capability and adoption signals are shifting',
+    executive_change: 'leadership direction is shifting',
+    infrastructure_project: 'capacity baselines are changing',
+    scientific_finding: 'evidence used for decisions is updating',
+    conflict_escalation: 'risk assumptions are rising',
+    long_form_analysis: 'the decision frame is shifting',
+    opinion_or_argument: 'the narrative shaping decisions is shifting'
+  };
+
+  return templates[eventType] ?? 'it shifts decision expectations';
+}
+
+function buildWhyAngleZh(eventType) {
+  const templates = {
+    policy_move: '政策边界正在调整，影响后续配置与执行',
+    regulatory_shift: '监管要求变化会改变合规成本与竞争空间',
+    legal_action: '法律行动改变操作空间与风险评估',
+    earnings_result: '业绩透露需求与盈利趋势的变化',
+    market_signal: '市场信号正在重塑短期预期',
+    funding_or_deal: '资本与交易改变竞争格局',
+    product_launch: '产品发布改变技术与应用节奏',
+    executive_change: '领导层变化往往带来战略重点调整',
+    infrastructure_project: '基础设施项目设定新的运行基线',
+    scientific_finding: '新证据更新政策或投资判断依据',
+    conflict_escalation: '冲突升级推高风险与政策不确定性',
+    long_form_analysis: '深度分析提供后续解读框架',
+    opinion_or_argument: '观点文章影响政策与舆论方向'
+  };
+
+  return templates[eventType] ?? '该进展改变后续判断的基线';
+}
+
+function buildWhyAngleZhCompact(eventType) {
+  const templates = {
+    policy_move: '政策边界调整，影响配置与执行',
+    regulatory_shift: '监管变化改变竞争空间',
+    legal_action: '法律风险在变化',
+    earnings_result: '需求与盈利信号在变化',
+    market_signal: '市场预期在变化',
+    funding_or_deal: '资本与交易改写竞争',
+    product_launch: '技术与应用节奏在变化',
+    executive_change: '战略重点在变化',
+    infrastructure_project: '容量基线在变化',
+    scientific_finding: '证据基础在更新',
+    conflict_escalation: '风险水平在上升',
+    long_form_analysis: '解读框架在变化',
+    opinion_or_argument: '舆论叙事在变化'
+  };
+
+  return templates[eventType] ?? '判断基线在变化';
+}
+
+function buildWhySecondaryClauseEn(topicLabels, strategicDimensions) {
+  const primaryDimension = strategicDimensions[0] ?? null;
+  if (primaryDimension) {
+    return `It also sets expectations for ${implicationFromStrategicDimension(primaryDimension)}.`;
+  }
+  const primaryTopic = topicLabels[0] ?? null;
+  if (primaryTopic) {
+    return `It also informs ${implicationFromTopic(primaryTopic)} decisions.`;
+  }
+  return '';
+}
+
+function buildWhySecondaryClauseZh(topicLabels, strategicDimensions) {
+  const primaryDimension = strategicDimensions[0] ?? null;
+  if (primaryDimension) {
+    return `这也关系到${implicationFromStrategicDimensionZh(primaryDimension)}。`;
+  }
+  const primaryTopic = topicLabels[0] ?? null;
+  if (primaryTopic) {
+    return `这也关系到${implicationFromTopicZh(primaryTopic)}。`;
+  }
+  return '';
+}
+
+function buildWhyItMattersEn({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules }) {
+  const minWords = rules.summary_rules.why_it_matters_min_words;
+  const maxWords = rules.summary_rules.why_it_matters_max_words;
+  const angle = buildWhyAngleEn(eventType);
+  const compactAngle = buildWhyAngleEnCompact(eventType);
+
+  let sentence = `${subject} matters for ${impactPhrase} because ${angle}.`;
+  if (countWords(sentence) > maxWords) {
+    sentence = `${subject} matters for ${impactPhrase} because ${compactAngle}.`;
+  }
+  if (countWords(sentence) > maxWords) {
+    sentence = `${subject} matters for ${impactPhrase}.`;
+  }
+  if (countWords(sentence) < minWords) {
+    const secondary = buildWhySecondaryClauseEn(topicLabels, strategicDimensions);
+    if (secondary) {
+      sentence = `${ensureTerminalPunctuation(sentence, 'en')} ${secondary}`;
+    }
+  }
+
+  return ensureTerminalPunctuation(sentence, 'en');
+}
+
+function buildWhyItMattersZh({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules }) {
+  const minChars = rules.summary_rules.why_it_matters_min_chars;
+  const maxChars = rules.summary_rules.why_it_matters_max_chars;
+  const angle = buildWhyAngleZh(eventType);
+  const compactAngle = buildWhyAngleZhCompact(eventType);
+
+  let sentence = `${subject}对${impactPhrase}很关键，因为${angle}。`;
+  if (countChineseChars(sentence) > maxChars) {
+    sentence = `${subject}对${impactPhrase}很关键，因为${compactAngle}。`;
+  }
+  if (countChineseChars(sentence) > maxChars) {
+    sentence = `${subject}对${impactPhrase}很关键。`;
+  }
+  if (countChineseChars(sentence) < minChars) {
+    const secondary = buildWhySecondaryClauseZh(topicLabels, strategicDimensions);
+    if (secondary) {
+      sentence = `${ensureTerminalPunctuation(sentence, 'zh')}${secondary}`;
+    }
+  }
+
+  return ensureTerminalPunctuation(sentence, 'zh');
 }
 
 function buildWhyItMatters(record, entities, geographies, eventType, topicLabels, strategicDimensions, rules) {
-  const subject = buildWhySubject(entities, geographies, eventType);
-  const impactPhrase = buildWhyImpactPhrase(topicLabels, strategicDimensions);
-  const sentence = buildWhyTemplate(eventType, subject, impactPhrase);
+  const sourceLanguage = record.language === 'zh' ? 'zh' : 'en';
+  const effectiveLanguage = rules.language_behavior.why_it_matters_same_as_source
+    ? sourceLanguage
+    : (rules.language_behavior.fallback_language || 'en');
 
-  const primaryTopic = topicLabels[0] ?? 'policy_analysis';
-  return truncateForLanguage(
-    sentence,
-    rules.language_behavior.why_it_matters_default_language,
-    rules.summary_rules.why_it_matters_max_chars
-  );
+  const subject = buildWhySubject(entities, geographies, eventType, effectiveLanguage);
+  const impactPhrase = buildWhyImpactPhrase(topicLabels, strategicDimensions, effectiveLanguage);
+
+  return effectiveLanguage === 'zh'
+    ? buildWhyItMattersZh({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules })
+    : buildWhyItMattersEn({ subject, impactPhrase, eventType, topicLabels, strategicDimensions, rules });
 }
 
 function computeOverlap(summary, whyItMatters, rules) {
