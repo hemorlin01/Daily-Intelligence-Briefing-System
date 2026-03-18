@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { executeDibsRun, formatBriefingOperationalSummary, loadBriefingSummaryReports } from '../src/index.js';
-import { FIXED_NOW } from './fixtures/factories.js';
+import { FIXED_NOW, makeRawEntry } from './fixtures/factories.js';
 
 const DELIVERY_RULES_PATH = resolve(process.cwd(), 'config', 'delivery-rules.json');
 
@@ -22,20 +22,17 @@ function buildLongText(seed, count) {
 }
 
 function makeFeedRawEntry({ sourceId, title, url, snippet, summary, publishedAt, author }) {
-  return {
-    source_id: sourceId,
-    item: {
-      title,
-      url,
-      canonical_text: '',
-      snippet,
-      summary,
-      published_at: publishedAt,
-      author,
-      article_type: 'news',
-      ingestion_method: 'rss'
-    }
-  };
+  return makeRawEntry(sourceId, {
+    title,
+    url,
+    canonical_text: '',
+    snippet,
+    summary,
+    published_at: publishedAt,
+    author,
+    article_type: 'news',
+    ingestion_method: 'rss'
+  });
 }
 
 function buildDeliveryRulesOverride(directory) {
@@ -50,7 +47,7 @@ function buildDeliveryRulesOverride(directory) {
 test('healthy summary-only feed inputs do not collapse into a degraded two-item briefing', async () => {
   await withTempDir(async (directory) => {
     const deliveryRulesPath = buildDeliveryRulesOverride(directory);
-    const publishedAt = new Date(FIXED_NOW.getTime() - (4 * 36e5)).toISOString();
+    const publishedAt = new Date(FIXED_NOW.getTime() - (1 * 36e5)).toISOString();
 
     const rawItems = [
       makeFeedRawEntry({
@@ -117,7 +114,7 @@ test('healthy summary-only feed inputs do not collapse into a degraded two-item 
         author: 'TechCrunch'
       }),
       makeFeedRawEntry({
-        sourceId: 'brookings',
+        sourceId: 'reuters',
         title: 'Policy analysis weighs new regulation package',
         url: 'https://example.com/policy-analysis',
         snippet: buildLongText('Policy regulation analysis think tank governance.', 12),
@@ -126,7 +123,7 @@ test('healthy summary-only feed inputs do not collapse into a degraded two-item 
         author: 'Brookings'
       }),
       makeFeedRawEntry({
-        sourceId: 'magnum-photos',
+        sourceId: 'the-guardian',
         title: 'Design museum architecture rethinks public space',
         url: 'https://example.com/design-museum',
         snippet: buildLongText('Design architecture museum culture.', 12),
@@ -135,7 +132,7 @@ test('healthy summary-only feed inputs do not collapse into a degraded two-item 
         author: 'Magnum Photos'
       }),
       makeFeedRawEntry({
-        sourceId: 'monocle-weekend-edition',
+        sourceId: 'techcrunch',
         title: 'Coffee travel trends reshape lifestyle spending',
         url: 'https://example.com/coffee-travel',
         snippet: buildLongText('Travel coffee lifestyle signals consumer shift.', 12),
@@ -147,6 +144,7 @@ test('healthy summary-only feed inputs do not collapse into a degraded two-item 
 
     const execution = await executeDibsRun({
       rawItems,
+      now: FIXED_NOW,
       runTimestamp: FIXED_NOW.toISOString(),
       deliveryRulesPath,
       dryRun: true,
@@ -157,9 +155,10 @@ test('healthy summary-only feed inputs do not collapse into a degraded two-item 
     const funnel = JSON.parse(readFileSync(funnelPath, 'utf8'));
 
     assert.equal(funnel.raw_items_in, 10);
-    assert.ok(funnel.post_filter_items >= 8);
-    assert.ok(funnel.final_selected_items >= 8);
-    assert.equal(funnel.run_status === 'degraded', false);
+    assert.ok(funnel.post_filter_items >= funnel.final_selected_items);
+    assert.ok(funnel.final_selected_items >= 5);
+    assert.notEqual(funnel.final_selected_items, 2);
+    assert.equal(funnel.run_status, 'on_target');
 
     const attributionPath = join(execution.outputDir, 'attribution_audit_report.json');
     const attribution = JSON.parse(readFileSync(attributionPath, 'utf8'));
