@@ -259,6 +259,40 @@ test('why_it_matters falls back when generic template phrases appear', () => {
   assert.doesNotMatch(why, /provides a frame/i);
 });
 
+test('why_it_matters fallback avoids analysis around phrasing', () => {
+  const record = makeCanonicalMainRecord({
+    article_id: 'why-subject-clean-1',
+    title: 'HKGAI releases report on inference efficiency',
+    canonical_text: 'HKGAI released a report on inference efficiency and model deployment trends.'.repeat(4),
+    raw_snippet: 'HKGAI released a report on inference efficiency.',
+    article_type: 'analysis'
+  });
+
+  const result = buildSemanticCards({
+    canonicalRecords: [record]
+  });
+
+  const why = result.cards[0].why_it_matters;
+  assert.doesNotMatch(why, /analysis around/i);
+});
+
+test('why_it_matters avoids unrelated public-health implication when topic mismatches', () => {
+  const record = makeCanonicalMainRecord({
+    article_id: 'why-topic-guard-1',
+    title: 'City museum opens weekend cafe near hospital campus',
+    canonical_text: 'The museum opened a weekend cafe and partnered on a neighborhood program near a hospital campus.'.repeat(3),
+    raw_snippet: 'The museum opened a weekend cafe near a hospital campus.',
+    article_type: 'feature'
+  });
+
+  const result = buildSemanticCards({
+    canonicalRecords: [record]
+  });
+
+  const why = result.cards[0].why_it_matters;
+  assert.doesNotMatch(why, /public health/i);
+});
+
 test('invalid event_type is rejected', () => {
   const taxonomy = loadSemanticTaxonomy('./config/semantic-taxonomy.json');
 
