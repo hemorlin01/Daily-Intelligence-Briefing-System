@@ -1,6 +1,12 @@
+# Environment — contains real API keys, never commit
 .env
+
+# Dependencies
 node_modules/
+
+# Artifacts (generated output)
 artifacts/
-*.log
+
+# OS junk
 .DS_Store
 Thumbs.db
