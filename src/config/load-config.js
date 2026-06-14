@@ -474,7 +474,7 @@ export function loadDeliveryRules(path) {
   assertString(rules.artifacts.output_root, 'artifacts.output_root', context);
   assertString(rules.artifacts.ledger_path, 'artifacts.ledger_path', context);
 
-  for (const channel of ['email', 'telegram']) {
+  for (const channel of ['email', 'telegram', 'bark', 'wecom']) {
     const config = rules.delivery[channel];
     if (!config || typeof config !== 'object' || Array.isArray(config)) {
       throw new Error(`${context}: missing delivery config for "${channel}"`);

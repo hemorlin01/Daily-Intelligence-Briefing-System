@@ -159,6 +159,12 @@ function writeTempDeliveryRules(directory) {
       telegram: {
         ...rules.delivery.telegram,
         mode: 'local-file'
+      },
+      bark: {
+        ...rules.delivery.bark
+      },
+      wecom: {
+        ...rules.delivery.wecom
       }
     }
   };

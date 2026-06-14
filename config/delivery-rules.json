@@ -15,6 +15,18 @@
       "mode": "telegram-bot-api",
       "destination_env": "DIBS_TELEGRAM_CHAT_ID",
       "destination_fallback": "local-telegram-outbox"
+    },
+    "bark": {
+      "enabled": true,
+      "mode": "bark-api",
+      "destination_env": "BARK_DEVICE_KEY",
+      "destination_fallback": "local-bark-outbox"
+    },
+    "wecom": {
+      "enabled": true,
+      "mode": "wecom-webhook",
+      "destination_env": "WECOM_WEBHOOK_URL",
+      "destination_fallback": "local-wecom-outbox"
     }
   },
   "retry": {

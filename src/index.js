@@ -13,6 +13,9 @@ export { validateRenderedBriefing, validateRenderingInput } from './models/rende
 export { createSemanticCard, validateSemanticCard } from './models/semantic-card.js';
 export { EmailDeliveryAdapter } from './delivery/email-adapter.js';
 export { TelegramDeliveryAdapter } from './delivery/telegram-adapter.js';
+export { BarkDeliveryAdapter } from './delivery/bark-adapter.js';
+export { WeComDeliveryAdapter, splitWeComMarkdown } from './delivery/wecom-adapter.js';
+export { deliveryOutcomeExitCode } from './delivery/delivery-outcome.js';
 export { buildFeedInventory, generateLiveInputArtifacts } from './live-input/generate-live-inputs.js';
 export { dispatchIngestionAdapter } from './live-input/adapters.js';
 export { formatLiveInputOperationalSummary, formatLiveInputRuntimeTable } from './live-input/summary.js';

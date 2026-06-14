@@ -10,13 +10,38 @@ function defaultLedger() {
   };
 }
 
+function safeDestination(channel, destination) {
+  if (!destination) {
+    return destination;
+  }
+  if (channel === 'bark') {
+    return 'bark-device';
+  }
+  if (channel === 'wecom') {
+    return 'wecom-webhook';
+  }
+  return destination;
+}
+
+function sanitizeLedger(ledger) {
+  for (const entry of Object.values(ledger.channel_attempts ?? {})) {
+    entry.destination = safeDestination(entry.channel, entry.destination);
+  }
+  for (const run of Object.values(ledger.runs ?? {})) {
+    for (const [channel, entry] of Object.entries(run.channels ?? {})) {
+      entry.destination = safeDestination(channel, entry.destination);
+    }
+  }
+  return ledger;
+}
+
 export function loadDeliveryLedger(ledgerPath) {
   const resolvedPath = resolve(process.cwd(), ledgerPath);
   if (!existsSync(resolvedPath)) {
     return defaultLedger();
   }
 
-  return JSON.parse(readFileSync(resolvedPath, 'utf8'));
+  return sanitizeLedger(JSON.parse(readFileSync(resolvedPath, 'utf8')));
 }
 
 export function saveDeliveryLedger(ledgerPath, ledger) {

@@ -74,7 +74,7 @@ export function validateRunBundle(bundle, selectionResult, renderedBriefing) {
   if (!bundle.delivery_targets || typeof bundle.delivery_targets !== 'object' || Array.isArray(bundle.delivery_targets)) {
     throw new Error(`${context}: "delivery_targets" must be an object`);
   }
-  for (const channel of ['email', 'telegram']) {
+  for (const channel of ['email', 'telegram', 'bark', 'wecom']) {
     const target = bundle.delivery_targets[channel];
     if (!target || typeof target !== 'object' || Array.isArray(target)) {
       throw new Error(`${context}: missing delivery target for "${channel}"`);
@@ -100,7 +100,7 @@ export function validateRunBundle(bundle, selectionResult, renderedBriefing) {
   if (!bundle.idempotency.per_channel || typeof bundle.idempotency.per_channel !== 'object' || Array.isArray(bundle.idempotency.per_channel)) {
     throw new Error(`${context}: "idempotency.per_channel" must be an object`);
   }
-  for (const channel of ['email', 'telegram']) {
+  for (const channel of ['email', 'telegram', 'bark', 'wecom']) {
     assertNonEmptyString(bundle.idempotency.per_channel[channel], `idempotency.per_channel.${channel}`, context);
   }
 

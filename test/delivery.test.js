@@ -1,11 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import {
   EmailDeliveryAdapter,
   TelegramDeliveryAdapter,
+  BarkDeliveryAdapter,
+  WeComDeliveryAdapter,
+  splitWeComMarkdown,
+  deliveryOutcomeExitCode,
   deliverRunBundle,
   executeDibsRun,
   executeScheduledDibsRun,
@@ -115,6 +119,14 @@ function writeTempDeliveryRules(directory, overrides = {}) {
         ...rules.delivery.telegram,
         mode: 'local-file',
         ...(overrides.delivery?.telegram ?? {})
+      },
+      bark: {
+        ...rules.delivery.bark,
+        ...(overrides.delivery?.bark ?? {})
+      },
+      wecom: {
+        ...rules.delivery.wecom,
+        ...(overrides.delivery?.wecom ?? {})
       }
     },
     retry: {
@@ -166,6 +178,147 @@ test('dry-run mode does not perform actual send but records correct status', asy
     assert.equal(result.deliveryStatus.channels.email.actual_send, false);
     assert.equal(existsSync(join(result.outputDir, 'delivery', 'email-delivered.txt')), false);
   });
+});
+
+test('bark adapter validates provider response and sends rendered compact content', async () => {
+  const requests = [];
+  const bundle = {
+    run_timestamp: FIXED_NOW.toISOString(),
+    artifacts: {
+      telegram: { content: 'Headline\nSummary: Decision-useful context.\nWhy it matters: Concrete impact.' }
+    }
+  };
+  const adapter = new BarkDeliveryAdapter({
+    request: async (url, options) => {
+      requests.push({ url, options });
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ code: 200, message: 'success' })
+      };
+    }
+  });
+
+  const success = await adapter.deliver({ bundle, destination: 'device-key' });
+  assert.equal(success.status, 'success');
+  assert.equal(success.actual_send, true);
+  assert.match(JSON.parse(requests[0].options.body).body, /Decision-useful context/);
+
+  const failed = await new BarkDeliveryAdapter({
+    request: async () => ({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ code: 400, message: 'invalid device key' })
+    })
+  }).deliver({ bundle, destination: 'bad-key' });
+  assert.equal(failed.status, 'failed');
+  assert.match(failed.error.message, /invalid device key/);
+});
+
+test('wecom adapter splits by UTF-8 bytes and fails honestly on a rejected chunk', async () => {
+  const content = `# Briefing\n\n${'中文摘要。'.repeat(900)}`;
+  const chunks = splitWeComMarkdown(content);
+  assert.ok(chunks.length > 1);
+  assert.equal(chunks.every((chunk) => Buffer.byteLength(chunk, 'utf8') <= 3800), true);
+
+  let attempts = 0;
+  const adapter = new WeComDeliveryAdapter({
+    request: async () => {
+      attempts += 1;
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify(
+          attempts === 2
+            ? { errcode: 40058, errmsg: 'markdown.content exceed max length 4096' }
+            : { errcode: 0, errmsg: 'ok' }
+        )
+      };
+    }
+  });
+  const result = await adapter.deliver({
+    bundle: { artifacts: { email: { content } } },
+    destination: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=test-key'
+  });
+
+  assert.equal(result.status, 'failed');
+  assert.equal(result.actual_send, true);
+  assert.equal(result.error.code, 'WECOM_40058');
+  assert.equal(result.provider_metadata.sent_chunk_count, 1);
+
+  const invalidDestination = await adapter.deliver({
+    bundle: { artifacts: { email: { content: 'Briefing' } } },
+    destination: 'https://example.com/private-webhook'
+  });
+  assert.equal(invalidDestination.status, 'failed');
+  assert.equal(invalidDestination.destination, 'wecom-webhook');
+});
+
+test('sensitive Bark and WeCom destinations are redacted from run artifacts and ledger', async () => {
+  await withTempDir(async (directory) => {
+    const deliveryRulesPath = writeTempDeliveryRules(directory);
+    const barkKey = 'private-bark-device-key';
+    const wecomWebhook = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=private-wecom-key';
+    const ledgerPath = join(directory, 'state', 'delivery-ledger.json');
+    mkdirSync(join(directory, 'state'), { recursive: true });
+    writeFileSync(ledgerPath, JSON.stringify({
+      version: 1,
+      updated_at: FIXED_NOW.toISOString(),
+      channel_attempts: {
+        old_bark: {
+          run_id: 'old-run',
+          channel: 'bark',
+          idempotency_key: 'old_bark',
+          destination: barkKey
+        },
+        old_wecom: {
+          run_id: 'old-run',
+          channel: 'wecom',
+          idempotency_key: 'old_wecom',
+          destination: wecomWebhook
+        }
+      },
+      runs: {
+        'old-run': {
+          run_id: 'old-run',
+          channels: {
+            bark: { destination: barkKey },
+            wecom: { destination: wecomWebhook }
+          }
+        }
+      }
+    }, null, 2));
+    const result = await executeDibsRun({
+      rawItems: buildRawItems(),
+      now: FIXED_NOW,
+      runTimestamp: FIXED_NOW.toISOString(),
+      deliveryRulesPath,
+      dryRun: true,
+      channels: ['bark', 'wecom'],
+      environment: {
+        BARK_DEVICE_KEY: barkKey,
+        WECOM_WEBHOOK_URL: wecomWebhook
+      }
+    });
+
+    const artifactText = [
+      readFileSync(join(result.outputDir, 'run_bundle.json'), 'utf8'),
+      readFileSync(join(result.outputDir, 'delivery_status.json'), 'utf8'),
+      readFileSync(ledgerPath, 'utf8')
+    ].join('\n');
+
+    assert.equal(artifactText.includes(barkKey), false);
+    assert.equal(artifactText.includes(wecomWebhook), false);
+    assert.equal(result.deliveryStatus.channels.bark.destination, 'bark-device');
+    assert.equal(result.deliveryStatus.channels.wecom.destination, 'wecom-webhook');
+  });
+});
+
+test('delivery CLI exit code surfaces failed and partial channel outcomes', () => {
+  assert.equal(deliveryOutcomeExitCode('success'), 0);
+  assert.equal(deliveryOutcomeExitCode('dry_run'), 0);
+  assert.equal(deliveryOutcomeExitCode('failed'), 1);
+  assert.equal(deliveryOutcomeExitCode('partial_success'), 1);
 });
 
 test('email adapter returns structured success and failure shapes', async () => {

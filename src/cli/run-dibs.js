@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { deliveryOutcomeExitCode } from '../delivery/delivery-outcome.js';
 import { executeDibsRun, executeScheduledDibsRun, retryRunBundleDelivery } from '../pipeline/execute-dibs-run.js';
 
 dotenv.config({ path: resolve(process.cwd(), '.env'), quiet: true });
@@ -34,7 +35,7 @@ async function main() {
 
   const channels = args.channels
     ? args.channels.split(',').map((value) => value.trim()).filter(Boolean)
-    : ['email', 'telegram'];
+    : ['email', 'telegram', 'bark', 'wecom'];
 
   if (args['retry-run-bundle']) {
     const result = await retryRunBundleDelivery({
@@ -50,11 +51,12 @@ async function main() {
       final_outcome: result.deliveryStatus.final_outcome,
       channels: result.deliveryStatus.channels
     }, null, 2));
+    process.exitCode = deliveryOutcomeExitCode(result.deliveryStatus.final_outcome);
     return;
   }
 
   if (!args.input) {
-    throw new Error('Usage: node src/cli/run-dibs.js --input <raw-items.json> [--scheduled] [--dry-run] [--replay] [--channels email,telegram] [--retry-run-bundle <run_bundle.json>]');
+    throw new Error('Usage: node src/cli/run-dibs.js --input <raw-items.json> [--scheduled] [--dry-run] [--replay] [--channels email,telegram,bark,wecom] [--retry-run-bundle <run_bundle.json>]');
   }
 
   const rawItems = JSON.parse(readFileSync(resolve(process.cwd(), args.input), 'utf8'));
@@ -86,6 +88,9 @@ async function main() {
     output_dir: result.outputDir,
     channels: result.deliveryStatus.channels
   }, null, 2));
+  if (result.scheduled !== false) {
+    process.exitCode = deliveryOutcomeExitCode(result.deliveryStatus.final_outcome);
+  }
 }
 
 main().catch((error) => {

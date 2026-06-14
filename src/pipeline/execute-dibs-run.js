@@ -4,6 +4,8 @@ import { dirname, resolve } from 'node:path';
 import { loadDeliveryRules, loadEditorialRules, loadSemanticRules, loadSourceCatalog } from '../config/load-config.js';
 import { EmailDeliveryAdapter } from '../delivery/email-adapter.js';
 import { TelegramDeliveryAdapter } from '../delivery/telegram-adapter.js';
+import { BarkDeliveryAdapter } from '../delivery/bark-adapter.js';
+import { WeComDeliveryAdapter } from '../delivery/wecom-adapter.js';
 import { getChannelLedgerEntry, loadDeliveryLedger, recordChannelAttempt, saveDeliveryLedger } from '../delivery/state-store.js';
 import { createRunBundle, validateRunBundle } from '../models/run-bundle.js';
 import { buildCandidatePools } from './build-candidate-pools.js';
@@ -269,6 +271,38 @@ function resolveChannelDestination(channelConfig, environment) {
   return environment[channelConfig.destination_env] ?? channelConfig.destination_fallback;
 }
 
+function bundleChannelTarget(channelConfig, environment, sensitive = false) {
+  return {
+    enabled: channelConfig.enabled,
+    mode: channelConfig.mode,
+    destination_env: channelConfig.destination_env,
+    destination: sensitive && environment[channelConfig.destination_env]
+      ? '[configured]'
+      : resolveChannelDestination(channelConfig, environment)
+  };
+}
+
+function resolveRuntimeTarget(target, environment) {
+  return {
+    ...target,
+    destination: environment[target.destination_env]
+      ?? (target.destination === '[configured]' ? null : target.destination)
+  };
+}
+
+function safeDeliveryDestination(channel, destination) {
+  if (!destination) {
+    return null;
+  }
+  if (channel === 'bark') {
+    return 'bark-device';
+  }
+  if (channel === 'wecom') {
+    return 'wecom-webhook';
+  }
+  return destination;
+}
+
 function buildRunBundle({
   runId,
   runTimestamp,
@@ -324,23 +358,19 @@ function buildRunBundle({
       }
     },
     delivery_targets: {
-      email: {
-        enabled: deliveryRules.delivery.email.enabled,
-        mode: deliveryRules.delivery.email.mode,
-        destination: resolveChannelDestination(deliveryRules.delivery.email, environment)
-      },
-      telegram: {
-        enabled: deliveryRules.delivery.telegram.enabled,
-        mode: deliveryRules.delivery.telegram.mode,
-        destination: resolveChannelDestination(deliveryRules.delivery.telegram, environment)
-      }
+      email: bundleChannelTarget(deliveryRules.delivery.email, environment),
+      telegram: bundleChannelTarget(deliveryRules.delivery.telegram, environment),
+      bark: bundleChannelTarget(deliveryRules.delivery.bark, environment, true),
+      wecom: bundleChannelTarget(deliveryRules.delivery.wecom, environment, true)
     },
     diagnostics_references: diagnosticsReferences,
     idempotency: {
       run_fingerprint: runFingerprint,
       per_channel: {
         email: hashContent(`${runId}:email:${rendered.email.content}`),
-        telegram: hashContent(`${runId}:telegram:${rendered.telegram.content}`)
+        telegram: hashContent(`${runId}:telegram:${rendered.telegram.content}`),
+        bark: hashContent(`${runId}:bark:${rendered.telegram.content}`),
+        wecom: hashContent(`${runId}:wecom:${rendered.email.content}`)
       }
     }
   }, selectionResult, rendered);
@@ -351,14 +381,16 @@ function buildRunBundle({
 function defaultAdapters(deliveryRules, adapterOverrides) {
   return {
     email: adapterOverrides.email ?? new EmailDeliveryAdapter({ mode: deliveryRules.delivery.email.mode }),
-    telegram: adapterOverrides.telegram ?? new TelegramDeliveryAdapter({ mode: deliveryRules.delivery.telegram.mode })
+    telegram: adapterOverrides.telegram ?? new TelegramDeliveryAdapter({ mode: deliveryRules.delivery.telegram.mode }),
+    bark: adapterOverrides.bark ?? new BarkDeliveryAdapter(),
+    wecom: adapterOverrides.wecom ?? new WeComDeliveryAdapter()
   };
 }
 
 function buildSkippedDuplicateResult({ channel, target, priorEntry, now, dryRun, providerMode }) {
   return {
     channel,
-    destination: target.destination,
+    destination: priorEntry?.destination ?? safeDeliveryDestination(channel, target.destination),
     status: 'duplicate_blocked',
     success: true,
     dry_run: dryRun,
@@ -392,7 +424,7 @@ function updateLedgerForResult({
     dry_run: result.dry_run,
     actual_send: result.actual_send,
     skipped_duplicate: result.skipped_duplicate,
-    destination: target.destination,
+    destination: result.destination ?? safeDeliveryDestination(channel, target.destination),
     artifact_path: result.artifact_path,
     error: result.error
   });
@@ -416,7 +448,7 @@ async function deliverChannel({
   if (!target.enabled) {
     return {
       channel,
-      destination: target.destination,
+      destination: safeDeliveryDestination(channel, target.destination),
       status: 'disabled',
       success: false,
       dry_run: dryRun,
@@ -699,10 +731,11 @@ export async function deliverRunBundle({
   const channelResults = {};
 
   for (const channel of channels) {
+    const target = resolveRuntimeTarget(bundle.delivery_targets[channel], environment);
     channelResults[channel] = await deliverChannel({
       bundle,
       channel,
-      target: bundle.delivery_targets[channel],
+      target,
       adapter: adapters[channel],
       retryRules: deliveryRules.retry,
       ledger,
