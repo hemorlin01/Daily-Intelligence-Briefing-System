@@ -1007,7 +1007,21 @@ function extractSemanticCard(record, taxonomy, rules) {
   const entities = inferEntities(record, rules, warnings);
   const geographies = inferGeographies(record, rules, warnings);
   record.geography_primary = geographies.primary;
-  const factualSummary = summarizeFactually(record, rules, warnings);
+  // Prefer LLM-generated content when available
+  let factualSummary;
+  let whyItMatters;
+  let usedLlm = false;
+
+  if (record.llm_factual_summary && record.llm_factual_summary.trim().length > 0) {
+    factualSummary = ensureTerminalPunctuation(
+      normalizeWhitespace(record.llm_factual_summary),
+      record.language === 'zh' ? 'zh' : 'en'
+    );
+    usedLlm = true;
+  } else {
+    factualSummary = summarizeFactually(record, rules, warnings);
+  }
+
   const novelty = inferNoveltySignal(record, eventType.label, warnings);
   const userRelevanceSignal = inferUserRelevanceSignal(topicLabels, record.source_priority_tier ?? 3);
   const candidateKeywords = buildCandidateKeywords({
@@ -1018,15 +1032,24 @@ function extractSemanticCard(record, taxonomy, rules) {
     rules
   });
 
-  let whyItMatters = buildWhyItMatters(
-    record,
-    entities,
-    geographies,
-    eventType.label,
-    topicLabels,
-    strategicDimensions,
-    rules
-  );
+  if (record.llm_why_it_matters && record.llm_why_it_matters.trim().length > 0) {
+    whyItMatters = ensureTerminalPunctuation(
+      normalizeWhitespace(record.llm_why_it_matters),
+      record.language === 'zh' ? 'zh' : 'en'
+    );
+    usedLlm = true;
+  } else {
+    whyItMatters = buildWhyItMatters(
+      record,
+      entities,
+      geographies,
+      eventType.label,
+      topicLabels,
+      strategicDimensions,
+      rules
+    );
+  }
+
   const separation = enforceSummarySeparation({
     summary: factualSummary,
     whyItMatters,
@@ -1040,6 +1063,10 @@ function extractSemanticCard(record, taxonomy, rules) {
     warnings
   });
   whyItMatters = separation.whyItMatters;
+
+  if (usedLlm) {
+    addWarning(warnings, 'llm_enriched', 'Summary or why_it_matters was enriched by an LLM pass.', 'info');
+  }
 
   const confidenceScore = computeConfidenceScore({
     record,
@@ -1092,7 +1119,8 @@ function extractSemanticCard(record, taxonomy, rules) {
       event_type_match: eventType.matchedBy,
       overlap_scores: separation.overlap,
       attempted_empty_topic_labels: topicLabels.length === 0,
-      attempted_empty_candidate_keywords: candidateKeywords.length === 0
+      attempted_empty_candidate_keywords: candidateKeywords.length === 0,
+      llm_enriched: usedLlm
     }
   }, taxonomy);
 }

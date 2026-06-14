@@ -18,16 +18,19 @@ jobs:
     timeout-minutes: 30
 
     env:
-      GMAIL_SMTP_HOST: ${{ secrets.GMAIL_SMTP_HOST }}
-      GMAIL_SMTP_PORT: ${{ secrets.GMAIL_SMTP_PORT }}
-      GMAIL_SMTP_SECURE: ${{ secrets.GMAIL_SMTP_SECURE }}
-      GMAIL_SMTP_USER: ${{ secrets.GMAIL_SMTP_USER }}
-      GMAIL_SMTP_APP_PASSWORD: ${{ secrets.GMAIL_SMTP_APP_PASSWORD }}
-      GMAIL_FROM_ADDRESS: ${{ secrets.GMAIL_FROM_ADDRESS }}
-      DIBS_EMAIL_TO: ${{ secrets.DIBS_EMAIL_TO }}
+      # Content enrichment
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
 
-      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      DIBS_TELEGRAM_CHAT_ID: ${{ secrets.DIBS_TELEGRAM_CHAT_ID }}
+      # Delivery: WeCom (企业微信) — primary
+      WECOM_WEBHOOK_URL: ${{ secrets.WECOM_WEBHOOK_URL }}
+
+      # Delivery: Bark (optional — omit secret to skip)
+      BARK_DEVICE_KEY: ${{ secrets.BARK_DEVICE_KEY || '' }}
+      BARK_SERVER: ${{ secrets.BARK_SERVER || 'https://api.day.app' }}
+
+      # Delivery: WeChat Server酱 (optional — omit secret to skip)
+      WECHAT_PUSH_TYPE: serverchan
+      WECHAT_PUSH_TOKEN: ${{ secrets.WECHAT_PUSH_TOKEN || '' }}
 
     steps:
       - name: Checkout repository
@@ -51,6 +54,9 @@ jobs:
       - name: Generate live raw items
         run: npm run dibs:generate-live-inputs
 
+      - name: Enrich with LLM (DeepSeek)
+        run: npm run dibs:enrich -- --input artifacts/inputs/raw-items.json
+
       - name: Print live-input summary and source table
         if: always()
         run: |
@@ -61,7 +67,16 @@ jobs:
           fi
 
       - name: Run briefing pipeline
-        run: npm run dibs:run -- --input artifacts/inputs/raw-items.json --channels email,telegram
+        run: |
+          CHANNELS="wecom"
+          if [ -n "$BARK_DEVICE_KEY" ]; then
+            CHANNELS="$CHANNELS,bark"
+          fi
+          if [ -n "$WECHAT_PUSH_TOKEN" ]; then
+            CHANNELS="$CHANNELS,wechat"
+          fi
+          echo "Active channels: $CHANNELS"
+          npm run dibs:run -- --input artifacts/inputs/raw-items.json --channels "$CHANNELS"
 
       - name: Print briefing outcome summary
         if: always()
