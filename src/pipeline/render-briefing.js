@@ -353,7 +353,7 @@ function renderWeComCompact(selectionResult, blocks, rules, runTimestamp) {
       const summary = normalizeWhitespace(item.factual_summary);
       lines.push(`**${item.title}**`);
       lines.push(`> ${summary}`);
-      lines.push(`[阅读原文](${item.url})`);
+      lines.push(`<a href="${item.url}">阅读原文</a>`);
       lines.push('');
     }
   }
@@ -393,7 +393,7 @@ function renderWeCom(selectionResult, blocks, rules, runTimestamp) {
       lines.push(`**${item.title}**`);
       lines.push(`*${sourceAuthor}*`);
       lines.push(summary);
-      lines.push(`[Read](${item.url})`);
+      lines.push(`<a href="${item.url}">Read</a>`);
       lines.push('');
     }
   }
