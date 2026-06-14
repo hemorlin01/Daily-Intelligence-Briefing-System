@@ -7,7 +7,8 @@
     "backfill_minimum_candidate_score": 0.5,
     "healthy_pool_size": 12,
     "soft_content_score_bonus": 0.1,
-    "soft_content_minimum_relevance": "medium"
+    "soft_content_minimum_relevance": "medium",
+    "zh_language_bonus": 0.35
   },
   "caps": {
     "source_max_count": 2,
@@ -45,7 +46,8 @@
       "domain_need_score": 0.09,
       "cluster_uniqueness_score": 0.1,
       "long_form_bonus": 0.05,
-      "redundancy_penalty": 0.08
+      "redundancy_penalty": 0.08,
+      "language_score": 0.12
     },
     "source_priority_by_tier": {
       "1": 1,

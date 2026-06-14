@@ -189,6 +189,11 @@ function computeLongFormBonus(card, rules) {
     : 0;
 }
 
+function computeLanguageScore(card, rules) {
+  const zhBonus = Number(rules.selection.zh_language_bonus ?? 0.35);
+  return card.language === 'zh' ? 1 : (1 - zhBonus);
+}
+
 function computeClusterUniquenessScore(card, cluster) {
   const representativeBoost = cluster.representative_article_id === card.article_id ? 0.18 : 0;
   const sizePenalty = Math.min(0.55, (cluster.cluster_size - 1) * 0.16);
@@ -252,6 +257,7 @@ function scoreSemanticCards(cards, clusters, runTimestamp, rules, sourceCatalog)
       domain_need_score: round(domainNeedMap.need_by_domain[preferredPrimaryDomain] ?? 0),
       cluster_uniqueness_score: computeClusterUniquenessScore(card, cluster),
       long_form_bonus: computeLongFormBonus(card, rules),
+      language_score: computeLanguageScore(card, rules),
       redundancy_penalty: 0
     };
 
@@ -305,6 +311,7 @@ function scoreSemanticCards(cards, clusters, runTimestamp, rules, sourceCatalog)
       + candidate.score_breakdown.domain_need_score * weights.domain_need_score
       + candidate.score_breakdown.cluster_uniqueness_score * weights.cluster_uniqueness_score
       + candidate.score_breakdown.long_form_bonus * weights.long_form_bonus
+      + candidate.score_breakdown.language_score * weights.language_score
     );
     candidate.final_composite_score = round(clamp(positiveTotal - (candidate.score_breakdown.redundancy_penalty * weights.redundancy_penalty)));
   }
@@ -637,7 +644,8 @@ function buildScoreComponentCoverage(scoredCandidates) {
     'domain_need_score',
     'cluster_uniqueness_score',
     'long_form_bonus',
-    'redundancy_penalty'
+    'redundancy_penalty',
+    'language_score'
   ]) {
     coverage[field] = scoredCandidates.every((candidate) => typeof candidate.score_breakdown[field] === 'number');
   }

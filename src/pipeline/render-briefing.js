@@ -336,9 +336,13 @@ function renderTelegram(selectionResult, blocks, rules, runTimestamp) {
 }
 
 function renderWeComCompact(selectionResult, blocks, rules, runTimestamp) {
+  const zhCount = selectionResult.selected_items.filter(item => item.language === 'zh').length;
+  const enCount = selectionResult.selected_count - zhCount;
+  const langLine = zhCount > 0 ? `${zhCount}中文 / ${enCount}英文` : `${selectionResult.selected_count}篇`;
+
   const lines = [
     `# ${rules.briefing.title}`,
-    `> ${formatDate(runTimestamp, rules)} | ${selectionResult.selected_count}篇`,
+    `> ${formatDate(runTimestamp, rules)} | ${langLine}`,
     ''
   ];
 
@@ -351,16 +355,19 @@ function renderWeComCompact(selectionResult, blocks, rules, runTimestamp) {
     for (const item of block.items) {
       entryArticleIds.push(item.article_id);
       const summary = normalizeWhitespace(item.factual_summary);
+      const isChinese = item.language === 'zh';
+      const linkText = isChinese ? '阅读原文' : 'Read more';
+      const sourceAuthor = shouldRenderByline(item)
+        ? `${item.source_display_name} · ${item.author_byline}`
+        : item.source_display_name;
+
       lines.push(`**${item.title}**`);
-      lines.push(`> ${summary}`);
-      lines.push(`<a href="${item.url}">阅读原文</a>`);
+      lines.push('');
+      lines.push(summary);
+      lines.push('');
+      lines.push(`<font color="comment">${sourceAuthor}</font>   <a href="${item.url}">${linkText}</a>`);
       lines.push('');
     }
-  }
-
-  if (rules.markdown.include_footer) {
-    lines.push(`---`);
-    lines.push(`_${selectionResult.selected_count}篇 | 自动生成于 ${formatDate(runTimestamp, rules)}_`);
   }
 
   return {
@@ -371,9 +378,13 @@ function renderWeComCompact(selectionResult, blocks, rules, runTimestamp) {
 }
 
 function renderWeCom(selectionResult, blocks, rules, runTimestamp) {
+  const zhCount = selectionResult.selected_items.filter(item => item.language === 'zh').length;
+  const enCount = selectionResult.selected_count - zhCount;
+  const langLine = zhCount > 0 ? `${zhCount} CN / ${enCount} EN` : `${selectionResult.selected_count} items`;
+
   const lines = [
     `# ${rules.briefing.title}`,
-    `> ${formatDate(runTimestamp, rules)} | ${selectionResult.selected_count} items`,
+    `> ${formatDate(runTimestamp, rules)} | ${langLine}`,
     ''
   ];
 
@@ -386,21 +397,24 @@ function renderWeCom(selectionResult, blocks, rules, runTimestamp) {
     for (const item of block.items) {
       entryArticleIds.push(item.article_id);
       const summary = normalizeWhitespace(item.factual_summary);
+      const isChinese = item.language === 'zh';
+      const linkText = isChinese ? '阅读原文' : 'Read more';
       const sourceAuthor = shouldRenderByline(item)
         ? `${item.source_display_name} · ${item.author_byline}`
         : item.source_display_name;
 
       lines.push(`**${item.title}**`);
-      lines.push(`*${sourceAuthor}*`);
+      lines.push('');
       lines.push(summary);
-      lines.push(`<a href="${item.url}">Read</a>`);
+      lines.push('');
+      lines.push(`<font color="comment">${sourceAuthor}</font>   <a href="${item.url}">${linkText}</a>`);
       lines.push('');
     }
   }
 
   if (rules.markdown.include_footer) {
     lines.push(`---`);
-    lines.push(`_${selectionResult.selected_count} items | Generated ${formatDate(runTimestamp, rules)}_`);
+    lines.push(`<font color="comment">${selectionResult.selected_count} items | ${formatDate(runTimestamp, rules)}</font>`);
   }
 
   return {
