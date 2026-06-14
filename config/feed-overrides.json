@@ -318,12 +318,23 @@
       "feed_definitions": []
     },
     "thirtysixkr-daily": {
-      "feed_support_status": "unsupported",
-      "support_level": "no_repo_safe_public_feed",
-      "ingestion_method": "none",
-      "adapter_type": "none",
-      "notes": "Newsletter-form 36Kr source remains governed but not yet mapped to a repository-safe feed path.",
-      "feed_definitions": []
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "36氪 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "36氪 Home",
+          "url": "https://36kr.com/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
     },
     "foreign-affairs": {
       "feed_support_status": "restricted",
@@ -907,12 +918,23 @@
       "feed_definitions": []
     },
     "tmtpost-weekly": {
-      "feed_support_status": "unsupported",
-      "support_level": "no_repo_safe_public_feed",
-      "ingestion_method": "none",
-      "adapter_type": "none",
-      "notes": "This governed source is newsletter-first and currently lacks a repository-safe feed/archive path.",
-      "feed_definitions": []
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "钛媒体 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "钛媒体 Home",
+          "url": "https://www.tmtpost.com/rss.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
     },
     "foreign-policy": {
       "feed_support_status": "restricted",
@@ -1695,60 +1717,137 @@
       "feed_definitions": []
     },
     "eeo": {
-      "feed_support_status": "pending_review",
-      "support_level": "needs_source_review",
-      "ingestion_method": "none",
-      "adapter_type": "none",
-      "notes": "Economic Observer remains governed; Chinese-language feed support requires more validation.",
-      "feed_definitions": []
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "经济观察报 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "经济观察报 Home",
+          "url": "https://www.eeo.com.cn/rss/feed.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
     },
     "yicai": {
-      "feed_support_status": "pending_review",
-      "support_level": "needs_source_review",
-      "ingestion_method": "none",
-      "adapter_type": "none",
-      "notes": "Yicai remains governed; Chinese-language feed support requires more validation.",
-      "feed_definitions": []
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "第一财经 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "第一财经 Home",
+          "url": "https://www.yicai.com/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
     },
     "latepost": {
-      "feed_support_status": "pending_review",
-      "support_level": "needs_source_review",
-      "ingestion_method": "none",
-      "adapter_type": "none",
-      "notes": "LatePost remains governed; Chinese-language feed support requires more validation.",
-      "feed_definitions": []
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "晚点 LatePost Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "晚点 LatePost Home",
+          "url": "https://rss.latepost.com/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
     },
     "huxiu": {
-      "feed_support_status": "pending_review",
-      "support_level": "needs_source_review",
-      "ingestion_method": "none",
-      "adapter_type": "none",
-      "notes": "Huxiu remains governed; Chinese-language feed support requires more validation.",
-      "feed_definitions": []
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "虎嗅 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "虎嗅 Home",
+          "url": "https://www.huxiu.com/rss/0.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
     },
     "the-paper": {
-      "feed_support_status": "pending_review",
-      "support_level": "needs_source_review",
-      "ingestion_method": "none",
-      "adapter_type": "none",
-      "notes": "The Paper remains governed; Chinese-language feed support requires more validation.",
-      "feed_definitions": []
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "澎湃新闻 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "澎湃新闻 Home",
+          "url": "https://www.thepaper.cn/rss_news.jsp",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
     },
     "cls": {
-      "feed_support_status": "pending_review",
-      "support_level": "needs_source_review",
-      "ingestion_method": "none",
-      "adapter_type": "none",
-      "notes": "CLS remains governed; Chinese-language feed support requires more validation.",
-      "feed_definitions": []
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "财联社 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "财联社 Home",
+          "url": "https://www.cls.cn/telegraph",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
     },
     "china-newsweek": {
-      "feed_support_status": "pending_review",
-      "support_level": "needs_source_review",
-      "ingestion_method": "none",
-      "adapter_type": "none",
-      "notes": "China Newsweek remains governed; Chinese-language feed support requires more validation.",
-      "feed_definitions": []
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "中国新闻周刊 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "中国新闻周刊 Home",
+          "url": "https://www.inewsweek.cn/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
     },
     "dao-insights": {
       "feed_support_status": "pending_review",
@@ -1859,6 +1958,253 @@
           "adapter_type": "xml_feed",
           "content_mode": "summary_only",
           "expected_entry_type": "research",
+          "active_status": "active"
+        }
+      ]
+    },
+    "xinhua-politics": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "新华网 · 时政 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "新华网 · 时政 Home",
+          "url": "http://www.xinhuanet.com/politics/xhll.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "people-daily": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "人民网 · 时政 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "人民网 · 时政 Home",
+          "url": "http://www.people.com.cn/rss/politics.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "huanqiu": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "环球网 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "环球网 Home",
+          "url": "https://www.huanqiu.com/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "cankaoxiaoxi": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "参考消息 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "参考消息 Home",
+          "url": "https://www.cankaoxiaoxi.com/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "ithome": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "IT之家 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "IT之家 Home",
+          "url": "https://www.ithome.com/rss/",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "geekpark": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "极客公园 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "极客公园 Home",
+          "url": "https://www.geekpark.net/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "pingwest": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "品玩 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "品玩 Home",
+          "url": "https://www.pingwest.com/feed",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "jiemian": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "界面新闻 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "界面新闻 Home",
+          "url": "https://a.jiemian.com/index.php?m=article&a=rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "caijing-mag": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "财经杂志 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "财经杂志 Home",
+          "url": "https://www.caijing.com.cn/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "analysis",
+          "active_status": "active"
+        }
+      ]
+    },
+    "china-energy": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "中国能源报 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "中国能源报 Home",
+          "url": "https://paper.people.com.cn/zgnyb/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "sci-tech-daily": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "科技日报 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "科技日报 Home",
+          "url": "http://www.stdaily.com/rss",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "finance-sina": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "新浪财经 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "新浪财经 Home",
+          "url": "https://finance.sina.com.cn/rss/finance.xml",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
+          "active_status": "active"
+        }
+      ]
+    },
+    "tencent-tech": {
+      "feed_support_status": "supported",
+      "support_level": "validated_public_feed",
+      "ingestion_method": "rss",
+      "adapter_type": "xml_feed",
+      "notes": "腾讯科技 Chinese RSS feed.",
+      "feed_definitions": [
+        {
+          "feed_id": "home",
+          "label": "腾讯科技 Home",
+          "url": "https://new.qq.com/omn/rss/tech",
+          "format": "rss",
+          "adapter_type": "xml_feed",
+          "content_mode": "summary_only",
+          "expected_entry_type": "news",
           "active_status": "active"
         }
       ]

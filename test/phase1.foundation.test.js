@@ -39,8 +39,8 @@ test('loads the full approved source universe from config', () => {
   const approvedNames = Object.values(approvedUniverse).flat();
   const configuredNames = Array.from(catalog.sources.values()).map((source) => source.display_name);
 
-  assert.equal(catalog.sources.size, 133);
-  assert.equal(new Set(configuredNames).size, 133);
+  assert.equal(catalog.sources.size, 146);
+  assert.equal(new Set(configuredNames).size, 146);
   assert.deepEqual(new Set(configuredNames), new Set(approvedNames));
   assert.equal(Array.from(catalog.sources.values()).every((source) => source.active_status === 'active'), true);
 });
@@ -283,8 +283,8 @@ test('writes candidate diagnostics files', () => {
     assert.equal(existsSync(ingestionPath), true);
 
     const report = JSON.parse(readFileSync(candidateReportPath, 'utf8'));
-    assert.equal(report.configured_source_count, 133);
-    assert.equal(report.active_source_count, 133);
+    assert.equal(report.configured_source_count, 146);
+    assert.equal(report.active_source_count, 146);
     assert.deepEqual(report.configured_source_class_counts, {
       global_hard_news: 16,
       technology_digital_economy: 27,
@@ -292,7 +292,7 @@ test('writes candidate diagnostics files', () => {
       business_consulting_insight: 4,
       climate_sustainability: 25,
       urban_infrastructure: 16,
-      china_policy_economy: 20,
+      china_policy_economy: 33,
       culture_design_lifestyle: 7,
       academic_intellectual: 4
     });

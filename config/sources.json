@@ -7,7 +7,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["global_macro", "geopolitics"],
+      "default_topic_affinities": [
+        "global_macro",
+        "geopolitics"
+      ],
       "priority_tier": 1,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -23,7 +26,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["global_macro", "technology"],
+      "default_topic_affinities": [
+        "global_macro",
+        "technology"
+      ],
       "priority_tier": 1,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -39,7 +45,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["global_macro", "policy_analysis"],
+      "default_topic_affinities": [
+        "global_macro",
+        "policy_analysis"
+      ],
       "priority_tier": 1,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -56,7 +65,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["global_macro", "digital_economy"],
+      "default_topic_affinities": [
+        "global_macro",
+        "digital_economy"
+      ],
       "priority_tier": 1,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -72,7 +84,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "asia",
-      "default_topic_affinities": ["global_macro", "china_economy"],
+      "default_topic_affinities": [
+        "global_macro",
+        "china_economy"
+      ],
       "priority_tier": 1,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -88,7 +103,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["global_macro", "geopolitics"],
+      "default_topic_affinities": [
+        "global_macro",
+        "geopolitics"
+      ],
       "priority_tier": 1,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -104,7 +122,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "uk",
-      "default_topic_affinities": ["geopolitics", "global_macro"],
+      "default_topic_affinities": [
+        "geopolitics",
+        "global_macro"
+      ],
       "priority_tier": 1,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -120,7 +141,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "europe",
-      "default_topic_affinities": ["geopolitics", "policy_analysis"],
+      "default_topic_affinities": [
+        "geopolitics",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -136,7 +160,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "hong_kong",
-      "default_topic_affinities": ["china_economy", "geopolitics"],
+      "default_topic_affinities": [
+        "china_economy",
+        "geopolitics"
+      ],
       "priority_tier": 2,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -152,7 +179,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "asia",
-      "default_topic_affinities": ["geopolitics", "global_macro"],
+      "default_topic_affinities": [
+        "geopolitics",
+        "global_macro"
+      ],
       "priority_tier": 2,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -168,7 +198,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "asia",
-      "default_topic_affinities": ["geopolitics", "global_macro"],
+      "default_topic_affinities": [
+        "geopolitics",
+        "global_macro"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -184,7 +217,10 @@
       "source_class": "global_hard_news",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "global_macro"],
+      "default_topic_affinities": [
+        "china_economy",
+        "global_macro"
+      ],
       "priority_tier": 2,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -201,7 +237,10 @@
       "source_class": "global_hard_news",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "global_macro"],
+      "default_topic_affinities": [
+        "china_economy",
+        "global_macro"
+      ],
       "priority_tier": 2,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -217,7 +256,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -234,7 +276,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -251,7 +296,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["technology", "geopolitics"],
+      "default_topic_affinities": [
+        "technology",
+        "geopolitics"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -268,7 +316,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -284,7 +335,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -300,7 +354,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -316,7 +373,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["technology", "policy_analysis"],
+      "default_topic_affinities": [
+        "technology",
+        "policy_analysis"
+      ],
       "priority_tier": 1,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -333,7 +393,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -349,7 +412,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["technology", "global_macro"],
+      "default_topic_affinities": [
+        "technology",
+        "global_macro"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -366,9 +432,12 @@
       "source_class": "technology_digital_economy",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["technology", "china_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "china_economy"
+      ],
       "priority_tier": 2,
-      "fetch_method": "newsletter",
+      "fetch_method": "rss",
       "parser_type": "newsletter",
       "canonicalization_policy": "standard",
       "paywall_policy": "free",
@@ -382,7 +451,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["policy_analysis", "geopolitics"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "geopolitics"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -399,7 +471,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["policy_analysis", "geopolitics"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "geopolitics"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -416,7 +491,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["policy_analysis", "geopolitics"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "geopolitics"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -433,7 +511,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["geopolitics", "policy_analysis"],
+      "default_topic_affinities": [
+        "geopolitics",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -450,7 +531,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["policy_analysis", "geopolitics"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "geopolitics"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -467,7 +551,10 @@
       "source_class": "business_consulting_insight",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["policy_analysis", "digital_economy"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -484,7 +571,10 @@
       "source_class": "business_consulting_insight",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["policy_analysis", "global_macro"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "global_macro"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -501,7 +591,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["climate_transition", "policy_analysis"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "policy_analysis"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -518,7 +611,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["climate_transition", "global_macro"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "global_macro"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -534,7 +630,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["climate_transition", "policy_analysis"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -551,7 +650,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["climate_transition", "digital_economy"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -567,7 +669,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["urban_systems", "climate_transition"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "climate_transition"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -583,7 +688,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["urban_systems", "policy_analysis"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -600,7 +708,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["urban_systems", "policy_analysis"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -617,7 +728,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "global_macro"],
+      "default_topic_affinities": [
+        "china_economy",
+        "global_macro"
+      ],
       "priority_tier": 1,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -633,7 +747,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "culture_design"],
+      "default_topic_affinities": [
+        "china_economy",
+        "culture_design"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -649,7 +766,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "policy_analysis"],
+      "default_topic_affinities": [
+        "china_economy",
+        "policy_analysis"
+      ],
       "priority_tier": 1,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -666,7 +786,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "policy_analysis"],
+      "default_topic_affinities": [
+        "china_economy",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -683,7 +806,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["china_economy", "policy_analysis"],
+      "default_topic_affinities": [
+        "china_economy",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -700,7 +826,10 @@
       "source_class": "culture_design_lifestyle",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["culture_design", "lifestyle_signals"],
+      "default_topic_affinities": [
+        "culture_design",
+        "lifestyle_signals"
+      ],
       "priority_tier": 3,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -716,7 +845,10 @@
       "source_class": "culture_design_lifestyle",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["culture_design", "lifestyle_signals"],
+      "default_topic_affinities": [
+        "culture_design",
+        "lifestyle_signals"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -732,7 +864,10 @@
       "source_class": "culture_design_lifestyle",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["culture_design", "technology"],
+      "default_topic_affinities": [
+        "culture_design",
+        "technology"
+      ],
       "priority_tier": 3,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -748,7 +883,10 @@
       "source_class": "academic_intellectual",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["policy_analysis", "culture_design"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "culture_design"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -765,7 +903,10 @@
       "source_class": "academic_intellectual",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["policy_analysis", "culture_design"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "culture_design"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -782,7 +923,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["global_macro", "technology"],
+      "default_topic_affinities": [
+        "global_macro",
+        "technology"
+      ],
       "priority_tier": 1,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -798,7 +942,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "uk",
-      "default_topic_affinities": ["geopolitics", "global_macro"],
+      "default_topic_affinities": [
+        "geopolitics",
+        "global_macro"
+      ],
       "priority_tier": 2,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -814,7 +961,10 @@
       "source_class": "global_hard_news",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["policy_analysis", "geopolitics"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "geopolitics"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -830,7 +980,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -846,7 +999,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 1,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -863,7 +1019,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["digital_economy", "global_macro"],
+      "default_topic_affinities": [
+        "digital_economy",
+        "global_macro"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -879,7 +1038,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["digital_economy", "culture_design"],
+      "default_topic_affinities": [
+        "digital_economy",
+        "culture_design"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -895,7 +1057,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -911,7 +1076,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -928,7 +1096,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "uk",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -944,7 +1115,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 3,
       "fetch_method": "rss",
       "parser_type": "article",
@@ -960,7 +1134,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -977,7 +1154,10 @@
       "source_class": "technology_digital_economy",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 1,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -994,9 +1174,12 @@
       "source_class": "technology_digital_economy",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["technology", "china_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "china_economy"
+      ],
       "priority_tier": 2,
-      "fetch_method": "newsletter",
+      "fetch_method": "rss",
       "parser_type": "newsletter",
       "canonicalization_policy": "standard",
       "paywall_policy": "free",
@@ -1010,7 +1193,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["policy_analysis", "geopolitics"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "geopolitics"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1027,7 +1213,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["policy_analysis", "geopolitics"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "geopolitics"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1044,7 +1233,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["geopolitics", "policy_analysis"],
+      "default_topic_affinities": [
+        "geopolitics",
+        "policy_analysis"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1061,7 +1253,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "uk",
-      "default_topic_affinities": ["policy_analysis", "geopolitics"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "geopolitics"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1078,7 +1273,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "europe",
-      "default_topic_affinities": ["policy_analysis", "geopolitics"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "geopolitics"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1095,7 +1293,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["policy_analysis", "geopolitics"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "geopolitics"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1112,7 +1313,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["policy_analysis", "geopolitics"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "geopolitics"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1129,7 +1333,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "asia_pacific",
-      "default_topic_affinities": ["policy_analysis", "geopolitics"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "geopolitics"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1146,7 +1353,10 @@
       "source_class": "policy_geopolitics_institutions",
       "language": "en",
       "primary_region": "europe",
-      "default_topic_affinities": ["china_economy", "policy_analysis"],
+      "default_topic_affinities": [
+        "china_economy",
+        "policy_analysis"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1163,7 +1373,10 @@
       "source_class": "business_consulting_insight",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["policy_analysis", "global_macro"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "global_macro"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1180,7 +1393,10 @@
       "source_class": "business_consulting_insight",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["policy_analysis", "global_macro"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "global_macro"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1197,7 +1413,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["climate_transition", "policy_analysis"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "policy_analysis"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1213,7 +1432,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["climate_transition", "policy_analysis"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1229,7 +1451,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["climate_transition", "policy_analysis"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1246,7 +1471,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["climate_transition", "global_macro"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "global_macro"
+      ],
       "priority_tier": 1,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -1263,7 +1491,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["climate_transition", "digital_economy"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1279,7 +1510,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["climate_transition", "technology"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "technology"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1296,7 +1530,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["climate_transition", "policy_analysis"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1313,7 +1550,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["climate_transition", "policy_analysis"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "policy_analysis"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1330,7 +1570,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["climate_transition", "policy_analysis"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "policy_analysis"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1347,7 +1590,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["climate_transition", "technology"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "technology"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1363,7 +1609,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["climate_transition", "policy_analysis"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "policy_analysis"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1379,7 +1628,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["climate_transition", "global_macro"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "global_macro"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1395,7 +1647,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["climate_transition", "digital_economy"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1411,7 +1666,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["climate_transition", "digital_economy"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1428,7 +1686,10 @@
       "source_class": "climate_sustainability",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["climate_transition", "policy_analysis"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1445,7 +1706,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["urban_systems", "policy_analysis"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1462,7 +1726,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["urban_systems", "culture_design"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "culture_design"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1479,7 +1746,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["urban_systems", "culture_design"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "culture_design"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1495,7 +1765,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["urban_systems", "policy_analysis"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1511,7 +1784,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["urban_systems", "policy_analysis"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1528,7 +1804,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["urban_systems", "technology"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "technology"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1544,7 +1823,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["urban_systems", "technology"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "technology"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1560,7 +1842,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["urban_systems", "global_macro"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "global_macro"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1576,7 +1861,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["urban_systems", "global_macro"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "global_macro"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1593,7 +1881,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "usa",
-      "default_topic_affinities": ["urban_systems", "technology"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "technology"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1609,7 +1900,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["urban_systems", "policy_analysis"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1626,7 +1920,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["urban_systems", "technology"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "technology"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1642,7 +1939,10 @@
       "source_class": "urban_infrastructure",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["urban_systems", "climate_transition"],
+      "default_topic_affinities": [
+        "urban_systems",
+        "climate_transition"
+      ],
       "priority_tier": 2,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -1659,7 +1959,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "policy_analysis"],
+      "default_topic_affinities": [
+        "china_economy",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1676,7 +1979,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "policy_analysis"],
+      "default_topic_affinities": [
+        "china_economy",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1693,7 +1999,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "technology"],
+      "default_topic_affinities": [
+        "china_economy",
+        "technology"
+      ],
       "priority_tier": 2,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -1710,7 +2019,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "policy_analysis"],
+      "default_topic_affinities": [
+        "china_economy",
+        "policy_analysis"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1727,7 +2039,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "policy_analysis"],
+      "default_topic_affinities": [
+        "china_economy",
+        "policy_analysis"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1744,7 +2059,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "culture_design"],
+      "default_topic_affinities": [
+        "china_economy",
+        "culture_design"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1760,7 +2078,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "climate_transition"],
+      "default_topic_affinities": [
+        "china_economy",
+        "climate_transition"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1777,7 +2098,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "policy_analysis"],
+      "default_topic_affinities": [
+        "china_economy",
+        "policy_analysis"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1794,7 +2118,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "asia",
-      "default_topic_affinities": ["china_economy", "global_macro"],
+      "default_topic_affinities": [
+        "china_economy",
+        "global_macro"
+      ],
       "priority_tier": 1,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1810,7 +2137,10 @@
       "source_class": "china_policy_economy",
       "language": "en",
       "primary_region": "asia",
-      "default_topic_affinities": ["china_economy", "geopolitics"],
+      "default_topic_affinities": [
+        "china_economy",
+        "geopolitics"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1827,7 +2157,10 @@
       "source_class": "climate_sustainability",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["climate_transition", "china_economy"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "china_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -1844,7 +2177,10 @@
       "source_class": "climate_sustainability",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["climate_transition", "china_economy"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "china_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1860,7 +2196,10 @@
       "source_class": "climate_sustainability",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["climate_transition", "policy_analysis"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "policy_analysis"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1876,7 +2215,10 @@
       "source_class": "climate_sustainability",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["climate_transition", "policy_analysis"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1892,7 +2234,10 @@
       "source_class": "climate_sustainability",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["climate_transition", "urban_systems"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "urban_systems"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1909,7 +2254,10 @@
       "source_class": "climate_sustainability",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["climate_transition", "global_macro"],
+      "default_topic_affinities": [
+        "climate_transition",
+        "global_macro"
+      ],
       "priority_tier": 2,
       "fetch_method": "website",
       "parser_type": "article",
@@ -1926,9 +2274,12 @@
       "source_class": "china_policy_economy",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "global_macro"],
+      "default_topic_affinities": [
+        "china_economy",
+        "global_macro"
+      ],
       "priority_tier": 2,
-      "fetch_method": "website",
+      "fetch_method": "rss",
       "parser_type": "article",
       "canonicalization_policy": "standard",
       "paywall_policy": "free",
@@ -1942,9 +2293,12 @@
       "source_class": "china_policy_economy",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "global_macro"],
+      "default_topic_affinities": [
+        "china_economy",
+        "global_macro"
+      ],
       "priority_tier": 2,
-      "fetch_method": "website",
+      "fetch_method": "rss",
       "parser_type": "article",
       "canonicalization_policy": "standard",
       "paywall_policy": "free",
@@ -1958,9 +2312,12 @@
       "source_class": "technology_digital_economy",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["technology", "china_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "china_economy"
+      ],
       "priority_tier": 2,
-      "fetch_method": "website",
+      "fetch_method": "rss",
       "parser_type": "article",
       "canonicalization_policy": "standard",
       "paywall_policy": "free",
@@ -1974,9 +2331,12 @@
       "source_class": "technology_digital_economy",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["technology", "china_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "china_economy"
+      ],
       "priority_tier": 2,
-      "fetch_method": "website",
+      "fetch_method": "rss",
       "parser_type": "article",
       "canonicalization_policy": "standard",
       "paywall_policy": "free",
@@ -1990,9 +2350,12 @@
       "source_class": "china_policy_economy",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "policy_analysis"],
+      "default_topic_affinities": [
+        "china_economy",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
-      "fetch_method": "website",
+      "fetch_method": "rss",
       "parser_type": "article",
       "canonicalization_policy": "standard",
       "paywall_policy": "free",
@@ -2006,9 +2369,12 @@
       "source_class": "china_policy_economy",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "global_macro"],
+      "default_topic_affinities": [
+        "china_economy",
+        "global_macro"
+      ],
       "priority_tier": 2,
-      "fetch_method": "website",
+      "fetch_method": "rss",
       "parser_type": "article",
       "canonicalization_policy": "standard",
       "paywall_policy": "free",
@@ -2022,9 +2388,12 @@
       "source_class": "china_policy_economy",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["china_economy", "policy_analysis"],
+      "default_topic_affinities": [
+        "china_economy",
+        "policy_analysis"
+      ],
       "priority_tier": 2,
-      "fetch_method": "website",
+      "fetch_method": "rss",
       "parser_type": "article",
       "canonicalization_policy": "standard",
       "paywall_policy": "free",
@@ -2038,7 +2407,10 @@
       "source_class": "technology_digital_economy",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -2054,7 +2426,10 @@
       "source_class": "technology_digital_economy",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -2070,7 +2445,10 @@
       "source_class": "technology_digital_economy",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -2086,7 +2464,10 @@
       "source_class": "technology_digital_economy",
       "language": "zh",
       "primary_region": "china",
-      "default_topic_affinities": ["technology", "digital_economy"],
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
       "priority_tier": 2,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -2102,7 +2483,10 @@
       "source_class": "culture_design_lifestyle",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["culture_design", "lifestyle_signals"],
+      "default_topic_affinities": [
+        "culture_design",
+        "lifestyle_signals"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -2118,7 +2502,10 @@
       "source_class": "culture_design_lifestyle",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["culture_design", "lifestyle_signals"],
+      "default_topic_affinities": [
+        "culture_design",
+        "lifestyle_signals"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -2134,7 +2521,10 @@
       "source_class": "culture_design_lifestyle",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["culture_design", "lifestyle_signals"],
+      "default_topic_affinities": [
+        "culture_design",
+        "lifestyle_signals"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -2150,7 +2540,10 @@
       "source_class": "culture_design_lifestyle",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["culture_design", "lifestyle_signals"],
+      "default_topic_affinities": [
+        "culture_design",
+        "lifestyle_signals"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -2166,7 +2559,10 @@
       "source_class": "academic_intellectual",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["policy_analysis", "climate_transition"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "climate_transition"
+      ],
       "priority_tier": 3,
       "fetch_method": "newsletter",
       "parser_type": "newsletter",
@@ -2183,7 +2579,10 @@
       "source_class": "academic_intellectual",
       "language": "en",
       "primary_region": "global",
-      "default_topic_affinities": ["policy_analysis", "culture_design"],
+      "default_topic_affinities": [
+        "policy_analysis",
+        "culture_design"
+      ],
       "priority_tier": 3,
       "fetch_method": "website",
       "parser_type": "article",
@@ -2193,6 +2592,263 @@
       "reliability_status": "trusted",
       "active_status": "active",
       "allowed_long_form_window_hours": 168
+    },
+    {
+      "source_id": "xinhua-politics",
+      "display_name": "新华网 · 时政",
+      "source_class": "china_policy_economy",
+      "language": "zh",
+      "primary_region": "china",
+      "default_topic_affinities": [
+        "policy_analysis",
+        "geopolitics",
+        "china_economy"
+      ],
+      "priority_tier": 1,
+      "fetch_method": "rss",
+      "parser_type": "article",
+      "canonicalization_policy": "standard",
+      "paywall_policy": "free",
+      "expected_article_type": "news",
+      "reliability_status": "trusted",
+      "active_status": "active"
+    },
+    {
+      "source_id": "people-daily",
+      "display_name": "人民网 · 时政",
+      "source_class": "china_policy_economy",
+      "language": "zh",
+      "primary_region": "china",
+      "default_topic_affinities": [
+        "policy_analysis",
+        "china_economy",
+        "geopolitics"
+      ],
+      "priority_tier": 1,
+      "fetch_method": "rss",
+      "parser_type": "article",
+      "canonicalization_policy": "standard",
+      "paywall_policy": "free",
+      "expected_article_type": "news",
+      "reliability_status": "trusted",
+      "active_status": "active"
+    },
+    {
+      "source_id": "huanqiu",
+      "display_name": "环球网",
+      "source_class": "china_policy_economy",
+      "language": "zh",
+      "primary_region": "china",
+      "default_topic_affinities": [
+        "geopolitics",
+        "policy_analysis",
+        "global_macro"
+      ],
+      "priority_tier": 2,
+      "fetch_method": "rss",
+      "parser_type": "article",
+      "canonicalization_policy": "standard",
+      "paywall_policy": "free",
+      "expected_article_type": "news",
+      "reliability_status": "trusted",
+      "active_status": "active"
+    },
+    {
+      "source_id": "cankaoxiaoxi",
+      "display_name": "参考消息",
+      "source_class": "china_policy_economy",
+      "language": "zh",
+      "primary_region": "china",
+      "default_topic_affinities": [
+        "geopolitics",
+        "policy_analysis",
+        "global_macro"
+      ],
+      "priority_tier": 2,
+      "fetch_method": "rss",
+      "parser_type": "article",
+      "canonicalization_policy": "standard",
+      "paywall_policy": "free",
+      "expected_article_type": "news",
+      "reliability_status": "trusted",
+      "active_status": "active"
+    },
+    {
+      "source_id": "ithome",
+      "display_name": "IT之家",
+      "source_class": "china_policy_economy",
+      "language": "zh",
+      "primary_region": "china",
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
+      "priority_tier": 3,
+      "fetch_method": "rss",
+      "parser_type": "article",
+      "canonicalization_policy": "standard",
+      "paywall_policy": "free",
+      "expected_article_type": "news",
+      "reliability_status": "trusted",
+      "active_status": "active"
+    },
+    {
+      "source_id": "geekpark",
+      "display_name": "极客公园",
+      "source_class": "china_policy_economy",
+      "language": "zh",
+      "primary_region": "china",
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
+      "priority_tier": 3,
+      "fetch_method": "rss",
+      "parser_type": "article",
+      "canonicalization_policy": "standard",
+      "paywall_policy": "free",
+      "expected_article_type": "analysis",
+      "reliability_status": "trusted",
+      "active_status": "active"
+    },
+    {
+      "source_id": "pingwest",
+      "display_name": "品玩",
+      "source_class": "china_policy_economy",
+      "language": "zh",
+      "primary_region": "china",
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy",
+        "china_economy"
+      ],
+      "priority_tier": 3,
+      "fetch_method": "rss",
+      "parser_type": "article",
+      "canonicalization_policy": "standard",
+      "paywall_policy": "free",
+      "expected_article_type": "news",
+      "reliability_status": "trusted",
+      "active_status": "active"
+    },
+    {
+      "source_id": "jiemian",
+      "display_name": "界面新闻",
+      "source_class": "china_policy_economy",
+      "language": "zh",
+      "primary_region": "china",
+      "default_topic_affinities": [
+        "china_economy",
+        "global_macro",
+        "technology"
+      ],
+      "priority_tier": 2,
+      "fetch_method": "rss",
+      "parser_type": "article",
+      "canonicalization_policy": "standard",
+      "paywall_policy": "free",
+      "expected_article_type": "news",
+      "reliability_status": "trusted",
+      "active_status": "active"
+    },
+    {
+      "source_id": "caijing-mag",
+      "display_name": "财经杂志",
+      "source_class": "china_policy_economy",
+      "language": "zh",
+      "primary_region": "china",
+      "default_topic_affinities": [
+        "china_economy",
+        "policy_analysis",
+        "global_macro"
+      ],
+      "priority_tier": 2,
+      "fetch_method": "rss",
+      "parser_type": "article",
+      "canonicalization_policy": "standard",
+      "paywall_policy": "free",
+      "expected_article_type": "analysis",
+      "reliability_status": "trusted",
+      "active_status": "active"
+    },
+    {
+      "source_id": "china-energy",
+      "display_name": "中国能源报",
+      "source_class": "china_policy_economy",
+      "language": "zh",
+      "primary_region": "china",
+      "default_topic_affinities": [
+        "climate_transition",
+        "china_economy",
+        "policy_analysis"
+      ],
+      "priority_tier": 2,
+      "fetch_method": "rss",
+      "parser_type": "article",
+      "canonicalization_policy": "standard",
+      "paywall_policy": "free",
+      "expected_article_type": "news",
+      "reliability_status": "trusted",
+      "active_status": "active"
+    },
+    {
+      "source_id": "sci-tech-daily",
+      "display_name": "科技日报",
+      "source_class": "china_policy_economy",
+      "language": "zh",
+      "primary_region": "china",
+      "default_topic_affinities": [
+        "technology",
+        "policy_analysis",
+        "china_economy"
+      ],
+      "priority_tier": 2,
+      "fetch_method": "rss",
+      "parser_type": "article",
+      "canonicalization_policy": "standard",
+      "paywall_policy": "free",
+      "expected_article_type": "news",
+      "reliability_status": "trusted",
+      "active_status": "active"
+    },
+    {
+      "source_id": "finance-sina",
+      "display_name": "新浪财经",
+      "source_class": "china_policy_economy",
+      "language": "zh",
+      "primary_region": "china",
+      "default_topic_affinities": [
+        "china_economy",
+        "global_macro",
+        "technology"
+      ],
+      "priority_tier": 3,
+      "fetch_method": "rss",
+      "parser_type": "article",
+      "canonicalization_policy": "standard",
+      "paywall_policy": "free",
+      "expected_article_type": "news",
+      "reliability_status": "trusted",
+      "active_status": "active"
+    },
+    {
+      "source_id": "tencent-tech",
+      "display_name": "腾讯科技",
+      "source_class": "china_policy_economy",
+      "language": "zh",
+      "primary_region": "china",
+      "default_topic_affinities": [
+        "technology",
+        "digital_economy"
+      ],
+      "priority_tier": 3,
+      "fetch_method": "rss",
+      "parser_type": "article",
+      "canonicalization_policy": "standard",
+      "paywall_policy": "free",
+      "expected_article_type": "news",
+      "reliability_status": "trusted",
+      "active_status": "active"
     }
   ]
 }
