@@ -3,7 +3,7 @@ name: DIBS Daily Run
 on:
   workflow_dispatch:
   schedule:
-    - cron: '20 23 * * *'
+    - cron: '0 1 * * *'
 
 permissions:
   contents: read
