@@ -321,6 +321,47 @@ test('delivery CLI exit code surfaces failed and partial channel outcomes', () =
   assert.equal(deliveryOutcomeExitCode('partial_success'), 1);
 });
 
+test('delivery rejects unregistered channels with an explicit error', async () => {
+  await assert.rejects(
+    () => deliverRunBundle({
+      bundle: {
+        run_id: 'invalid-channel-run',
+        run_timestamp: FIXED_NOW.toISOString(),
+        run_status: 'degraded',
+        selected_count: 0,
+        selected_article_ids: [],
+        artifacts: {
+          email: { content: 'Email', path: 'email.txt' },
+          telegram: { content: 'Telegram', path: 'telegram.txt' },
+          markdown: { content: 'Markdown', path: 'archive.md' }
+        },
+        delivery_targets: {
+          email: { enabled: true, mode: 'local-file', destination: 'email' },
+          telegram: { enabled: true, mode: 'local-file', destination: 'telegram' },
+          bark: { enabled: true, mode: 'bark-api', destination: 'bark' },
+          wecom: { enabled: true, mode: 'wecom-webhook', destination: 'wecom' }
+        },
+        diagnostics_references: {
+          delivery_status: 'delivery_status.json',
+          run_log: 'run_log.json'
+        },
+        idempotency: {
+          run_fingerprint: 'run-key',
+          per_channel: {
+            email: 'email-key',
+            telegram: 'telegram-key',
+            bark: 'bark-key',
+            wecom: 'wecom-key'
+          }
+        },
+        output_dir: 'artifacts/runs/invalid-channel-run'
+      },
+      channels: ['wechat']
+    }),
+    /Unsupported delivery channel "wechat"/
+  );
+});
+
 test('email adapter returns structured success and failure shapes', async () => {
   await withTempDir(async (directory) => {
     const adapter = new EmailDeliveryAdapter({ mode: 'local-file' });

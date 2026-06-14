@@ -51,8 +51,40 @@ function parseResponse(text) {
   }
 }
 
-async function callDeepSeek({ system, user, apiKey, apiUrl, model }) {
-  const res = await fetch(apiUrl, {
+function validateBatchResults(batch, results) {
+  const expectedIds = new Set(batch.map((item) => item.article_id));
+  const returnedIds = new Set();
+
+  for (const entry of results) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+      throw new Error('LLM response contains a non-object entry');
+    }
+    if (!expectedIds.has(entry.article_id)) {
+      throw new Error(`LLM response contains unknown article_id "${entry.article_id ?? 'missing'}"`);
+    }
+    if (returnedIds.has(entry.article_id)) {
+      throw new Error(`LLM response contains duplicate article_id "${entry.article_id}"`);
+    }
+    if (typeof entry.factual_summary !== 'string' || entry.factual_summary.trim().length === 0) {
+      throw new Error(`LLM response is missing factual_summary for article_id "${entry.article_id}"`);
+    }
+    if (typeof entry.why_it_matters !== 'string' || entry.why_it_matters.trim().length === 0) {
+      throw new Error(`LLM response is missing why_it_matters for article_id "${entry.article_id}"`);
+    }
+    returnedIds.add(entry.article_id);
+  }
+
+  for (const expectedId of expectedIds) {
+    if (!returnedIds.has(expectedId)) {
+      throw new Error(`LLM response is missing article_id "${expectedId}"`);
+    }
+  }
+
+  return results;
+}
+
+async function callDeepSeek({ system, user, apiKey, apiUrl, model, request }) {
+  const res = await request(apiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -84,27 +116,26 @@ async function callDeepSeek({ system, user, apiKey, apiUrl, model }) {
   return content;
 }
 
-async function enrichBatch(batch, { apiKey, apiUrl, model }, retries = 0) {
-  const hasZh = batch.some(item => item.language === 'zh');
-  const locale = hasZh ? 'zh' : 'en';
+async function enrichBatch(batch, config, retries = 0) {
+  const locale = batch[0]?.language === 'zh' ? 'zh' : 'en';
   const { system, user } = buildPrompt(batch, locale);
 
   try {
-    const content = await callDeepSeek({ system, user, apiKey, apiUrl, model });
-    return parseResponse(content);
+    const content = await callDeepSeek({ system, user, ...config });
+    return validateBatchResults(batch, parseResponse(content));
   } catch (error) {
-    if (retries < MAX_RETRIES) {
-      await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
+    if (retries < config.maxRetries) {
+      await new Promise((resolve) => setTimeout(resolve, config.retryDelayMs));
       // Retry with smaller batch
       if (batch.length > 5 && retries >= 1) {
         const mid = Math.ceil(batch.length / 2);
         const [results1, results2] = await Promise.all([
-          enrichBatch(batch.slice(0, mid), { apiKey, apiUrl, model }, retries + 1),
-          enrichBatch(batch.slice(mid), { apiKey, apiUrl, model }, retries + 1)
+          enrichBatch(batch.slice(0, mid), config, retries + 1),
+          enrichBatch(batch.slice(mid), config, retries + 1)
         ]);
         return [...results1, ...results2];
       }
-      return enrichBatch(batch, { apiKey, apiUrl, model }, retries + 1);
+      return enrichBatch(batch, config, retries + 1);
     }
     throw error;
   }
@@ -120,12 +151,13 @@ function chunkArray(arr, size) {
 
 async function processQueue(batches, config, onProgress) {
   const results = [];
+  const failures = [];
   let completed = 0;
   const total = batches.length;
 
   // Process in concurrent groups
-  for (let i = 0; i < batches.length; i += MAX_CONCURRENT) {
-    const group = batches.slice(i, i + MAX_CONCURRENT);
+  for (let i = 0; i < batches.length; i += config.maxConcurrent) {
+    const group = batches.slice(i, i + config.maxConcurrent);
     const groupResults = await Promise.allSettled(
       group.map(batch => enrichBatch(batch, config))
     );
@@ -135,12 +167,20 @@ async function processQueue(batches, config, onProgress) {
       if (result.status === 'fulfilled') {
         results.push(...result.value);
       } else {
-        console.error(`[LLM] Batch ${completed} failed: ${result.reason.message}`);
+        failures.push({
+          batch: completed,
+          message: result.reason?.message ?? 'Unknown LLM batch failure'
+        });
       }
       if (onProgress) {
         onProgress(completed, total);
       }
     }
+  }
+
+  if (failures.length > 0) {
+    const details = failures.map((failure) => `batch ${failure.batch}: ${failure.message}`).join('; ');
+    throw new Error(`LLM enrichment failed for ${failures.length}/${total} batch(es): ${details}`);
   }
 
   return results;
@@ -171,11 +211,19 @@ export async function enrichRawItems(rawItems, config) {
     apiUrl = process.env.LLM_API_URL || 'https://api.deepseek.com/v1/chat/completions',
     model = process.env.LLM_MODEL || 'deepseek-chat',
     onProgress = null,
-    dryRun = false
+    dryRun = false,
+    request = globalThis.fetch,
+    maxRetries = MAX_RETRIES,
+    retryDelayMs = RETRY_DELAY_MS,
+    batchSize = BATCH_SIZE,
+    maxConcurrent = MAX_CONCURRENT
   } = config;
 
   if (!apiKey) {
     throw new Error('DEEPSEEK_API_KEY or LLM_API_KEY is required for LLM enrichment');
+  }
+  if (typeof request !== 'function') {
+    throw new Error('LLM enrichment requires a fetch-compatible request implementation');
   }
 
   if (dryRun) {
@@ -191,12 +239,24 @@ export async function enrichRawItems(rawItems, config) {
   }
 
   const normalized = rawItems.map(normalizeItem);
-  const batches = chunkArray(normalized, BATCH_SIZE);
+  const languageGroups = new Map();
+  for (const item of normalized) {
+    const language = item.language === 'zh' ? 'zh' : 'en';
+    const group = languageGroups.get(language) ?? [];
+    group.push(item);
+    languageGroups.set(language, group);
+  }
+  const batches = Array.from(languageGroups.values())
+    .flatMap((group) => chunkArray(group, batchSize));
   
-  console.log(`[LLM] Starting enrichment: ${normalized.length} items in ${batches.length} batches (${BATCH_SIZE}/batch, ${MAX_CONCURRENT}x concurrent)`);
+  console.log(`[LLM] Starting enrichment: ${normalized.length} items in ${batches.length} language-specific batches (${batchSize}/batch, ${maxConcurrent}x concurrent)`);
   
   const startTime = Date.now();
-  const enrichedResults = await processQueue(batches, { apiKey, apiUrl, model }, onProgress);
+  const enrichedResults = await processQueue(
+    batches,
+    { apiKey, apiUrl, model, request, maxRetries, retryDelayMs, maxConcurrent },
+    onProgress
+  );
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
   // Build lookup map

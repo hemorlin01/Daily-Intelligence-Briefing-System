@@ -230,6 +230,8 @@ export function normalizeRawItem({ source, rawItem, rules, fetchedAt }) {
     content_completeness: completeness,
     normalization_warnings: warnings,
     publication_identity_score: computePublicationIdentityScore(rawItem, canonicalText.length, publication.hasValidPublicationTime),
+    llm_factual_summary: resolveFirstString(rawItem, RAW_ITEM_FIELD_ALIASES.llmFactualSummary),
+    llm_why_it_matters: resolveFirstString(rawItem, RAW_ITEM_FIELD_ALIASES.llmWhyItMatters),
     content_fingerprint: buildTokenFingerprint(
       canonicalText || sourceProvidedSummary || rawSnippet,
       rules.deduplication.max_content_fingerprint_chars

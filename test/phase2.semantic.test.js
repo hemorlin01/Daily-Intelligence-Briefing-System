@@ -151,6 +151,22 @@ test('why_it_matters follows source language for English and Chinese items', () 
   assert.equal(hasChinese(result.cards[1].why_it_matters), true);
 });
 
+test('invalid LLM language and generic LLM why-it-matters fall back safely', () => {
+  const result = buildSemanticCards({
+    canonicalRecords: [
+      makeCanonicalMainRecord({
+        llm_factual_summary: '这段中文摘要不应覆盖英文来源的摘要。',
+        llm_why_it_matters: 'This provides a frame for interpreting upcoming policy or market decisions.'
+      })
+    ]
+  });
+
+  assert.equal(result.cards.length, 1);
+  assert.equal(hasChinese(result.cards[0].factual_summary), false);
+  assert.doesNotMatch(result.cards[0].why_it_matters, /provides a frame/i);
+  assert.equal(result.cards[0].metadata.llm_enriched, false);
+});
+
 test('summary length policy distinguishes full-text and summary-only items', () => {
   const fullTextRecord = makeCanonicalMainRecord({
     article_id: 'full-text-1',

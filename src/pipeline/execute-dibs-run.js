@@ -731,6 +731,9 @@ export async function deliverRunBundle({
   const channelResults = {};
 
   for (const channel of channels) {
+    if (!bundle.delivery_targets[channel] || !adapters[channel]) {
+      throw new Error(`Unsupported delivery channel "${channel}"`);
+    }
     const target = resolveRuntimeTarget(bundle.delivery_targets[channel], environment);
     channelResults[channel] = await deliverChannel({
       bundle,

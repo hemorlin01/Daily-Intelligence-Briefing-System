@@ -12,7 +12,9 @@ export const RAW_ITEM_FIELD_ALIASES = Object.freeze({
   paywallFlag: Object.freeze(['paywall_flag']),
   originalPublicationUrl: Object.freeze(['original_publication_url']),
   isOriginalReporting: Object.freeze(['is_original_reporting']),
-  isSyndicatedCopy: Object.freeze(['is_syndicated_copy'])
+  isSyndicatedCopy: Object.freeze(['is_syndicated_copy']),
+  llmFactualSummary: Object.freeze(['llm_factual_summary']),
+  llmWhyItMatters: Object.freeze(['llm_why_it_matters'])
 });
 
 export const RAW_ITEM_INPUT_CONTRACT = Object.freeze({
@@ -87,6 +89,16 @@ export const RAW_ITEM_INPUT_CONTRACT = Object.freeze({
       canonical_field: 'is_syndicated_copy',
       accepted_aliases: RAW_ITEM_FIELD_ALIASES.isSyndicatedCopy,
       handling: 'optional provenance signal for duplicate tie-breaking'
+    },
+    {
+      canonical_field: 'llm_factual_summary',
+      accepted_aliases: RAW_ITEM_FIELD_ALIASES.llmFactualSummary,
+      handling: 'optional LLM enrichment passed through Phase 1 for semantic validation; never treated as canonical article body'
+    },
+    {
+      canonical_field: 'llm_why_it_matters',
+      accepted_aliases: RAW_ITEM_FIELD_ALIASES.llmWhyItMatters,
+      handling: 'optional LLM enrichment passed through Phase 1 for semantic validation'
     }
   ]),
   content_signal_rule: 'At least one of canonical_text, a substantial raw_snippet, or a substantial source_provided_summary must be present for eligibility.',

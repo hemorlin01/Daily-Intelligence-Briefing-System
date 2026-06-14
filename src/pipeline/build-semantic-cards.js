@@ -35,6 +35,32 @@ const GENERIC_WHY_PHRASES_EN = [
   /decision frame/i,
   /decision assumptions/i
 ];
+
+function isLanguageCompatibleLlmText(value, language) {
+  const normalized = normalizeWhitespace(value);
+  if (!normalized) {
+    return false;
+  }
+  const hasChinese = /[\u3400-\u9fff]/u.test(normalized);
+  if (language === 'zh') {
+    return hasChinese;
+  }
+  return !hasChinese && /[A-Za-z]{3,}/.test(normalized);
+}
+
+function isUsableLlmSummary(value, language) {
+  return isLanguageCompatibleLlmText(value, language);
+}
+
+function isUsableLlmWhy(value, language) {
+  if (!isLanguageCompatibleLlmText(value, language)) {
+    return false;
+  }
+  if (language !== 'zh' && GENERIC_WHY_PHRASES_EN.some((pattern) => pattern.test(value))) {
+    return false;
+  }
+  return true;
+}
 const SOFT_CONTENT_DOMAINS = new Set(['culture_design', 'lifestyle_signals']);
 const SOFT_CONTENT_TITLE_PATTERNS = [
   /\breview\b/i,
@@ -1012,13 +1038,16 @@ function extractSemanticCard(record, taxonomy, rules) {
   let whyItMatters;
   let usedLlm = false;
 
-  if (record.llm_factual_summary && record.llm_factual_summary.trim().length > 0) {
+  if (isUsableLlmSummary(record.llm_factual_summary, record.language === 'zh' ? 'zh' : 'en')) {
     factualSummary = ensureTerminalPunctuation(
       normalizeWhitespace(record.llm_factual_summary),
       record.language === 'zh' ? 'zh' : 'en'
     );
     usedLlm = true;
   } else {
+    if (record.llm_factual_summary) {
+      addWarning(warnings, 'llm_summary_rejected', 'LLM factual summary failed language or content validation.', 'warning');
+    }
     factualSummary = summarizeFactually(record, rules, warnings);
   }
 
@@ -1032,13 +1061,16 @@ function extractSemanticCard(record, taxonomy, rules) {
     rules
   });
 
-  if (record.llm_why_it_matters && record.llm_why_it_matters.trim().length > 0) {
+  if (isUsableLlmWhy(record.llm_why_it_matters, record.language === 'zh' ? 'zh' : 'en')) {
     whyItMatters = ensureTerminalPunctuation(
       normalizeWhitespace(record.llm_why_it_matters),
       record.language === 'zh' ? 'zh' : 'en'
     );
     usedLlm = true;
   } else {
+    if (record.llm_why_it_matters) {
+      addWarning(warnings, 'llm_why_rejected', 'LLM why_it_matters failed language or generic-content validation.', 'warning');
+    }
     whyItMatters = buildWhyItMatters(
       record,
       entities,
