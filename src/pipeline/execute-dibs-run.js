@@ -359,6 +359,10 @@ function buildRunBundle({
       markdown: {
         content: rendered.markdown.content,
         path: resolve(outputDir, 'briefing_archive.md')
+      },
+      wecom: {
+        content: rendered.wecom.content,
+        path: resolve(outputDir, 'briefing_wecom.md')
       }
     },
     delivery_targets: {
@@ -374,7 +378,7 @@ function buildRunBundle({
         email: hashContent(`${runId}:email:${rendered.email.content}`),
         telegram: hashContent(`${runId}:telegram:${rendered.telegram.content}`),
         bark: hashContent(`${runId}:bark:${rendered.telegram.content}`),
-        wecom: hashContent(`${runId}:wecom:${rendered.email.content}`)
+        wecom: hashContent(`${runId}:wecom:${rendered.wecom.content}`)
       }
     }
   }, selectionResult, rendered);

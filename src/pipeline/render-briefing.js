@@ -170,7 +170,6 @@ function renderEmail(selectionResult, blocks, rules, runTimestamp) {
         lines.push(`Byline: ${item.author_byline}`);
       }
       lines.push(`Summary: ${normalizeWhitespace(item.factual_summary)}`);
-      lines.push(`Why it matters: ${normalizeWhitespace(item.why_it_matters)}`);
       lines.push(`Read: ${item.url}`);
       lines.push('');
     }
@@ -216,8 +215,6 @@ function renderMarkdown(selectionResult, blocks, rules, runTimestamp) {
       lines.push('');
       lines.push(`**Summary**: ${normalizeWhitespace(item.factual_summary)}`);
       lines.push('');
-      lines.push(`**Why it matters**: ${normalizeWhitespace(item.why_it_matters)}`);
-      lines.push('');
     }
   }
 
@@ -241,7 +238,6 @@ function renderTelegramForStage(selectionResult, blocks, rules, runTimestamp, st
   const entryArticleIds = [];
   const compaction = {
     summary_count: 0,
-    why_count: 0,
     total_count: 0
   };
 
@@ -253,13 +249,9 @@ function renderTelegramForStage(selectionResult, blocks, rules, runTimestamp, st
       entryArticleIds.push(item.article_id);
       const language = item.language === 'zh' ? 'zh' : 'en';
       const summary = compactText(item.factual_summary, language, stage.summary_max_chars);
-      const why = compactText(item.why_it_matters, language, stage.why_max_chars);
 
       if (summary.compacted) {
         compaction.summary_count += 1;
-      }
-      if (why.compacted) {
-        compaction.why_count += 1;
       }
 
       lines.push(item.title);
@@ -268,13 +260,12 @@ function renderTelegramForStage(selectionResult, blocks, rules, runTimestamp, st
         lines.push(`Byline: ${item.author_byline}`);
       }
       lines.push(`Summary: ${summary.text}`);
-      lines.push(`Why it matters: ${why.text}`);
       lines.push(`Read: ${item.url}`);
       lines.push('');
     }
   }
 
-  compaction.total_count = compaction.summary_count + compaction.why_count;
+  compaction.total_count = compaction.summary_count;
 
   return {
     content: lines.join('\n'),
@@ -344,6 +335,81 @@ function renderTelegram(selectionResult, blocks, rules, runTimestamp) {
   throw new Error('Telegram rendering failed to fit within the configured length budget');
 }
 
+function renderWeComCompact(selectionResult, blocks, rules, runTimestamp) {
+  const lines = [
+    `# ${rules.briefing.title}`,
+    `> ${formatDate(runTimestamp, rules)} | ${selectionResult.selected_count}篇`,
+    ''
+  ];
+
+  const entryArticleIds = [];
+
+  for (const block of blocks) {
+    lines.push(`## ${block.label}`);
+    lines.push('');
+
+    for (const item of block.items) {
+      entryArticleIds.push(item.article_id);
+      const summary = normalizeWhitespace(item.factual_summary);
+      lines.push(`**${item.title}**`);
+      lines.push(`> ${summary}`);
+      lines.push(`[阅读原文](${item.url})`);
+      lines.push('');
+    }
+  }
+
+  if (rules.markdown.include_footer) {
+    lines.push(`---`);
+    lines.push(`_${selectionResult.selected_count}篇 | 自动生成于 ${formatDate(runTimestamp, rules)}_`);
+  }
+
+  return {
+    content: lines.join('\n'),
+    entry_article_ids: entryArticleIds,
+    omitted_article_ids: []
+  };
+}
+
+function renderWeCom(selectionResult, blocks, rules, runTimestamp) {
+  const lines = [
+    `# ${rules.briefing.title}`,
+    `> ${formatDate(runTimestamp, rules)} | ${selectionResult.selected_count} items`,
+    ''
+  ];
+
+  const entryArticleIds = [];
+
+  for (const block of blocks) {
+    lines.push(`## ${block.label}`);
+    lines.push('');
+
+    for (const item of block.items) {
+      entryArticleIds.push(item.article_id);
+      const summary = normalizeWhitespace(item.factual_summary);
+      const sourceAuthor = shouldRenderByline(item)
+        ? `${item.source_display_name} · ${item.author_byline}`
+        : item.source_display_name;
+
+      lines.push(`**${item.title}**`);
+      lines.push(`*${sourceAuthor}*`);
+      lines.push(summary);
+      lines.push(`[Read](${item.url})`);
+      lines.push('');
+    }
+  }
+
+  if (rules.markdown.include_footer) {
+    lines.push(`---`);
+    lines.push(`_${selectionResult.selected_count} items | Generated ${formatDate(runTimestamp, rules)}_`);
+  }
+
+  return {
+    content: lines.join('\n'),
+    entry_article_ids: entryArticleIds,
+    omitted_article_ids: []
+  };
+}
+
 function buildRenderingDiagnostics(selectionResult, blocks, rendered, rules) {
   const omittedBlockIds = rules.blocks.order.filter((blockId) => !blocks.some((block) => block.block_id === blockId));
   const warnings = [];
@@ -371,11 +437,11 @@ function buildRenderingDiagnostics(selectionResult, blocks, rendered, rules) {
     per_format_item_counts: {
       email: rendered.email.entry_article_ids.length,
       telegram: rendered.telegram.entry_article_ids.length,
-      markdown: rendered.markdown.entry_article_ids.length
+      markdown: rendered.markdown.entry_article_ids.length,
+      wecom: rendered.wecom.entry_article_ids.length
     },
     compaction_counts: {
       telegram_summary_count: rendered.telegram.compaction.summary_count,
-      telegram_why_count: rendered.telegram.compaction.why_count,
       telegram_total_count: rendered.telegram.compaction.total_count
     },
     telegram: {
@@ -399,6 +465,7 @@ function writeRenderingArtifacts(outputDir, rendered) {
   writeFileSync(resolve(outputDir, 'briefing_email.txt'), rendered.email.content);
   writeFileSync(resolve(outputDir, 'briefing_telegram.txt'), rendered.telegram.content);
   writeFileSync(resolve(outputDir, 'briefing_archive.md'), rendered.markdown.content);
+  writeFileSync(resolve(outputDir, 'briefing_wecom.md'), rendered.wecom.content);
   writeFileSync(resolve(outputDir, 'rendering_debug.json'), JSON.stringify(rendered.diagnostics, null, 2));
 }
 
@@ -420,10 +487,12 @@ export function renderBriefing({
   const email = renderEmail(selectionResult, blocks, rules, effectiveRunTimestamp);
   const telegram = renderTelegram(selectionResult, blocks, rules, effectiveRunTimestamp);
   const markdown = renderMarkdown(selectionResult, blocks, rules, effectiveRunTimestamp);
+  const wecom = renderWeCom(selectionResult, blocks, rules, effectiveRunTimestamp);
   const diagnostics = buildRenderingDiagnostics(selectionResult, blocks, {
     email,
     telegram,
-    markdown
+    markdown,
+    wecom
   }, rules);
 
   const rendered = {
@@ -432,6 +501,7 @@ export function renderBriefing({
     email,
     telegram,
     markdown,
+    wecom,
     diagnostics
   };
 

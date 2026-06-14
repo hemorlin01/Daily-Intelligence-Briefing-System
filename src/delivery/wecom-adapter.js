@@ -85,8 +85,8 @@ export class WeComDeliveryAdapter {
   }
 
   async deliver({ bundle, destination, dryRun = false, now = new Date().toISOString() }) {
-    if (!bundle?.artifacts?.email?.content) {
-      throw new Error('WeCom delivery requires a rendered email artifact');
+    if (!bundle?.artifacts?.wecom?.content) {
+      throw new Error('WeCom delivery requires a rendered wecom artifact');
     }
 
     const resolvedDestination = destination || process.env.WECOM_WEBHOOK_URL || '';
@@ -124,7 +124,7 @@ export class WeComDeliveryAdapter {
       });
     }
 
-    const chunks = splitWeComMarkdown(bundle.artifacts.email.content);
+    const chunks = splitWeComMarkdown(bundle.artifacts.wecom.content);
     const sentChunks = [];
     try {
       for (let index = 0; index < chunks.length; index += 1) {

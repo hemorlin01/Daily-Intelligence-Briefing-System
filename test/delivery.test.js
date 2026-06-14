@@ -237,7 +237,7 @@ test('wecom adapter splits by UTF-8 bytes and fails honestly on a rejected chunk
     }
   });
   const result = await adapter.deliver({
-    bundle: { artifacts: { email: { content } } },
+    bundle: { artifacts: { wecom: { content } } },
     destination: 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=test-key'
   });
 
@@ -247,7 +247,7 @@ test('wecom adapter splits by UTF-8 bytes and fails honestly on a rejected chunk
   assert.equal(result.provider_metadata.sent_chunk_count, 1);
 
   const invalidDestination = await adapter.deliver({
-    bundle: { artifacts: { email: { content: 'Briefing' } } },
+    bundle: { artifacts: { wecom: { content: 'Briefing' } } },
     destination: 'https://example.com/private-webhook'
   });
   assert.equal(invalidDestination.status, 'failed');
