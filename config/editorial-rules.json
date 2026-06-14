@@ -6,8 +6,8 @@
     "minimum_candidate_score": 0.46,
     "backfill_minimum_candidate_score": 0.5,
     "healthy_pool_size": 12,
-    "soft_content_score_bonus": 0.1,
-    "soft_content_minimum_relevance": "medium",
+    "soft_content_score_bonus": 0.2,
+    "soft_content_minimum_relevance": "high",
     "zh_language_bonus": 0.35
   },
   "caps": {

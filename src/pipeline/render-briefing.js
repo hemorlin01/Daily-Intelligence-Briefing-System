@@ -355,17 +355,16 @@ function renderWeComCompact(selectionResult, blocks, rules, runTimestamp) {
     for (const item of block.items) {
       entryArticleIds.push(item.article_id);
       const summary = normalizeWhitespace(item.factual_summary);
-      const isChinese = item.language === 'zh';
-      const linkText = isChinese ? '阅读原文' : 'Read more';
       const sourceAuthor = shouldRenderByline(item)
         ? `${item.source_display_name} · ${item.author_byline}`
         : item.source_display_name;
 
       lines.push(`**${item.title}**`);
       lines.push('');
-      lines.push(summary);
+      lines.push(`> ${summary}`);
       lines.push('');
-      lines.push(`<font color="comment">${sourceAuthor}</font>   <a href="${item.url}">${linkText}</a>`);
+      lines.push(`${sourceAuthor}`);
+      lines.push(`${item.url}`);
       lines.push('');
     }
   }
@@ -397,24 +396,20 @@ function renderWeCom(selectionResult, blocks, rules, runTimestamp) {
     for (const item of block.items) {
       entryArticleIds.push(item.article_id);
       const summary = normalizeWhitespace(item.factual_summary);
-      const isChinese = item.language === 'zh';
-      const linkText = isChinese ? '阅读原文' : 'Read more';
       const sourceAuthor = shouldRenderByline(item)
         ? `${item.source_display_name} · ${item.author_byline}`
         : item.source_display_name;
 
       lines.push(`**${item.title}**`);
       lines.push('');
-      lines.push(summary);
+      lines.push(`> ${summary}`);
       lines.push('');
-      lines.push(`<font color="comment">${sourceAuthor}</font>   <a href="${item.url}">${linkText}</a>`);
+      lines.push(`${sourceAuthor}`);
+      lines.push(`${item.url}`);
+      lines.push('');
+      lines.push('---');
       lines.push('');
     }
-  }
-
-  if (rules.markdown.include_footer) {
-    lines.push(`---`);
-    lines.push(`<font color="comment">${selectionResult.selected_count} items | ${formatDate(runTimestamp, rules)}</font>`);
   }
 
   return {
