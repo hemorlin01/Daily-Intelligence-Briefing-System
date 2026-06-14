@@ -268,25 +268,29 @@ function buildFinalBriefingStyleAudit({ editorial, rendered, runTimestamp }) {
 }
 
 function resolveChannelDestination(channelConfig, environment) {
-  return environment[channelConfig.destination_env] ?? channelConfig.destination_fallback;
+  const value = environment[channelConfig.destination_env];
+  return (typeof value === 'string' && value.trim().length > 0) ? value : channelConfig.destination_fallback;
 }
 
 function bundleChannelTarget(channelConfig, environment, sensitive = false) {
+  const envValue = environment[channelConfig.destination_env];
+  const hasEnv = typeof envValue === 'string' && envValue.trim().length > 0;
   return {
     enabled: channelConfig.enabled,
     mode: channelConfig.mode,
     destination_env: channelConfig.destination_env,
-    destination: sensitive && environment[channelConfig.destination_env]
+    destination: sensitive && hasEnv
       ? '[configured]'
       : resolveChannelDestination(channelConfig, environment)
   };
 }
 
 function resolveRuntimeTarget(target, environment) {
+  const envValue = environment[target.destination_env];
+  const hasEnv = typeof envValue === 'string' && envValue.trim().length > 0;
   return {
     ...target,
-    destination: environment[target.destination_env]
-      ?? (target.destination === '[configured]' ? null : target.destination)
+    destination: hasEnv ? envValue : (target.destination === '[configured]' ? null : target.destination)
   };
 }
 
